@@ -1,7 +1,7 @@
 import sys
 import sqlite3
 
-from math import sin, cos, tan, log10, log2, pi, e, gamma, asin, acos, atan, erf, sinh, cosh, tanh, asinh, acosh, atanh
+from math import sin, cos, tan, log10, log2, pi, e, gamma, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh
 
 from PyQt6 import uic
 from PyQt6.QtCore import QPointF, Qt
