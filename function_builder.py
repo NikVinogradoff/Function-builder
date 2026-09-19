@@ -44,17 +44,15 @@ class FunctionBuilder(QMainWindow):
         self.center = [0, 0]
         self.delta = 1
 
+        self.do_commit = False
+
         self.isdotted = True
         self.isaxis = True
-
-        self.do_it = True
 
         self.initUI()
 
     def initUI(self):
         self.setWindowTitle('Функциональный строитель')
-
-        self.do_paint = False
 
         self.new_window_btn.setEnabled(False)
         self.new_window_btn.clicked.connect(self.new_window)
@@ -123,41 +121,41 @@ class FunctionBuilder(QMainWindow):
         self.db.show()
 
     def paintEvent(self, event):
-        if self.function.text().strip() != '' and not self.do_paint:
-            self.function.setStyleSheet("background-color: white")
-        elif self.function.text().strip() != '' and self.do_paint:
+        do_build = True
+        if self.function.text().strip() != '':
             if self.Fx.isChecked():
                 func = 'f(x)'
                 label = 'y = '
+                self.new_window_btn.show()
             elif self.Fy.isChecked():
                 func = 'f(y)'
                 label = 'x = '
+                self.new_window_btn.show()
             else:
                 func = 'f(x, y)'
                 label = '0 = '
 
-            try:
-                self.cursor.execute("""
-                insert into functions(function, type)
-                values(?, ?)
-                """, (label + self.function.text(), func))
-                self.connection.commit()
-            except sqlite3.IntegrityError:
-                self.connection.commit()
-
-            qp = QPainter()
-            qp.begin(self)
-            self.build(qp)
-            qp.end()
-        elif self.do_paint and self.do_it:
-            self.function.setStyleSheet(f"background-color: {QColor(255, 75, 60).name()}")
-            self.new_window_btn.setEnabled(False)
-        self.do_paint = False
-        self.do_it = True
+            if self.do_commit:
+                try:
+                    self.cursor.execute("""
+                    insert into functions(function, type)
+                    values(?, ?)
+                    """, (label + self.function.text(), func))
+                    self.connection.commit()
+                except sqlite3.IntegrityError:
+                    self.connection.commit()
+                self.do_commit = False
+        else:
+            do_build = False
+            self.new_window_btn.hide()
+        qp = QPainter()
+        qp.begin(self)
+        self.build(qp, do_build)
+        qp.end()
 
     def paint(self):
         self.update()
-        self.do_paint = True
+        self.do_commit = True
 
     def is_point_valid(self, x, y):
         text = self.function.text()
@@ -294,8 +292,11 @@ class FunctionBuilder(QMainWindow):
             if abs(-self.center[0]) > self.delta * 5:
                 qp.drawText(QPointF(570, 567 - i * 40), str(round(self.center[1] + (i - 5) * self.delta, 2)))
 
-    def build(self, qp):
+    def build(self, qp, do_build=True):
         self.build_base(qp)
+
+        if not do_build:
+            return None
 
         qp.setPen(self.func_pen)
         points = []

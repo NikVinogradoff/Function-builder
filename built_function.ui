@@ -440,13 +440,13 @@ v</string>
     </rect>
    </property>
    <property name="text">
-    <string>Построить возможный интеграл функции</string>
+    <string>Построить первообразную функции</string>
    </property>
   </widget>
   <widget class="QPushButton" name="change_intcolor_btn">
    <property name="geometry">
     <rect>
-     <x>290</x>
+     <x>260</x>
      <y>770</y>
      <width>90</width>
      <height>23</height>
