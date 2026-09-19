@@ -1,0 +1,20 @@
+QPushButton:hover {
+    border: 2px solid #3498db;
+}
+
+QPushButton:pressed {
+    border: 2px solid #2980b9;
+}
+
+
+QLineEdit {
+    border: 1px solid #5ab2db;
+}
+
+QLineEdit:hover {
+    border: 2px solid #3498db;
+}
+
+QLineEdit:focus {
+    border: 2px solid #3498db;
+}
