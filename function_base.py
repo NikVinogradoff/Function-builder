@@ -28,6 +28,7 @@ class FunctionBase(QWidget):
     def initUI(self):
         self.setWindowTitle('База функций')
         self.setGeometry(400, 200, 750, 750)
+        self.setMinimumSize(750, 750)
         self.setStyleSheet(style)
 
         self.scroll_area = QScrollArea(self)

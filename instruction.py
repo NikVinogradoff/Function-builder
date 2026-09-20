@@ -10,6 +10,7 @@ class Instruction(QWidget):
     def initUI(self):
         self.setWindowTitle('Инструкция')
         self.setGeometry(400, 400, 400, 350)
+        self.setMinimumSize(400, 350)
 
         self.instr = QLabel(self)
         self.instr.setText('В поле ввода использовать только\nвыбранные переменные.\n'

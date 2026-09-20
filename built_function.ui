@@ -263,15 +263,15 @@ v</string>
   <widget class="QLabel" name="label_5">
    <property name="geometry">
     <rect>
-     <x>330</x>
+     <x>300</x>
      <y>870</y>
-     <width>247</width>
+     <width>385</width>
      <height>17</height>
     </rect>
    </property>
    <property name="text">
     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:9pt;&quot;&gt;
-    (вводить вещественные числа, 'e' или 'pi')&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    (вводить вещественные числа, 'e' или 'pi', а также операции с ними)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
    </property>
   </widget>
   <widget class="QPushButton" name="change_linecolor_btn">

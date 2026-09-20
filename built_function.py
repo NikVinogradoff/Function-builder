@@ -51,6 +51,7 @@ class BuiltFunction(QWidget):
             self.arg_label.setText('при y = ')
             self.value_label.setText('x = ')
         self.setGeometry(400, 80, 900, 900)
+        self.setMinimumSize(900, 900)
 
         self.verticalSlider.setMinimum(0)
         self.verticalSlider.setMaximum(8)

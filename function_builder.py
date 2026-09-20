@@ -54,6 +54,7 @@ class FunctionBuilder(QMainWindow):
 
     def initUI(self):
         self.setWindowTitle('Функциональный строитель')
+        self.setMinimumSize(810, 728)
 
         self.new_window_btn.setEnabled(False)
         self.new_window_btn.clicked.connect(self.new_window)
@@ -122,6 +123,8 @@ class FunctionBuilder(QMainWindow):
         self.db.show()
 
     def paintEvent(self, event):
+        if not self.Fxy.isChecked():
+            self.do_build = True
         self.updater()
         qp = QPainter()
         qp.begin(self)
