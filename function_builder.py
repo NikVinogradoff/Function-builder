@@ -45,6 +45,7 @@ class FunctionBuilder(QMainWindow):
         self.delta = 1
 
         self.do_commit = False
+        self.do_build = True
 
         self.isdotted = True
         self.isaxis = True
@@ -121,7 +122,18 @@ class FunctionBuilder(QMainWindow):
         self.db.show()
 
     def paintEvent(self, event):
-        do_build = True
+        self.updater()
+        qp = QPainter()
+        qp.begin(self)
+        self.build(qp, self.do_build)
+        qp.end()
+
+    def paint(self):
+        self.do_build = True
+        self.update()
+        self.do_commit = True
+
+    def updater(self):
         if self.function.text().strip() != '':
             if self.Fx.isChecked():
                 func = 'f(x)'
@@ -138,34 +150,26 @@ class FunctionBuilder(QMainWindow):
             if self.do_commit:
                 try:
                     self.cursor.execute("""
-                    insert into functions(function, type)
-                    values(?, ?)
-                    """, (label + self.function.text(), func))
+                            insert into functions(function, type)
+                            values(?, ?)
+                            """, (label + self.function.text(), func))
                     self.connection.commit()
                 except sqlite3.IntegrityError:
                     self.connection.commit()
                 self.do_commit = False
         else:
-            do_build = False
+            self.do_build = False
             self.new_window_btn.hide()
-        qp = QPainter()
-        qp.begin(self)
-        self.build(qp, do_build)
-        qp.end()
 
-    def paint(self):
-        self.update()
-        self.do_commit = True
-
-    def is_point_valid(self, x, y):
+    def is_point_valid(self, x, y, radius=1):
         text = self.function.text()
         func_x_max, func_x_min, func_y_max, func_y_min, func_x, func_y = '', '', '', '', '', ''
         delta = self.delta / 80
 
         for elem in text:
             if elem == 'x':
-                func_x_max += f'({x + delta})'
-                func_x_min += f'({x - delta})'
+                func_x_max += f'({x + radius * delta})'
+                func_x_min += f'({x - radius * delta})'
                 func_x += f'({x})'
                 func_y += f'({x})'
                 func_y_max += f'({x})'
@@ -175,8 +179,8 @@ class FunctionBuilder(QMainWindow):
                 func_x_min += f'({y})'
                 func_x += f'({y})'
                 func_y += f'({y})'
-                func_y_max += f'({y + delta})'
-                func_y_min += f'({y - delta})'
+                func_y_max += f'({y + radius * delta})'
+                func_y_min += f'({y - radius * delta})'
             else:
                 func_x_max += elem
                 func_x_min += elem
@@ -297,7 +301,9 @@ class FunctionBuilder(QMainWindow):
 
         if not do_build:
             return None
+        self.do_build = False
 
+        self.func_pen.setWidth(2)
         qp.setPen(self.func_pen)
         points = []
 
@@ -347,15 +353,17 @@ class FunctionBuilder(QMainWindow):
                     qp.drawLine(QPointF(590, 170 + i + 1), points[i + 1])
 
         else:
-            for x in range(190, 591):
-                for y in range(170, 571):
+            self.func_pen.setWidth(3)
+            for x in range(190, 591, 2):
+                for y in range(170, 571, 2):
                     point = QPointF(x, y)
                     if self.is_point_valid((x - 390) / 40 * self.delta + self.center[0],
-                                           (370 - y) / 40 * self.delta + self.center[1]):
-                        qp.drawPoint(point)
+                                           (370 - y) / 40 * self.delta + self.center[1],
+                                           radius=2):
+                        points.append(point)
+            qp.drawPoints(points)
 
     def change_argument(self):
-        self.do_it = False
         if self.Fxy.isChecked():
             arg = 'x'
             arg2 = 'y'
