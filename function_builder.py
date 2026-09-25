@@ -543,7 +543,7 @@ class FunctionBuilder(QMainWindow):
         self.Fxy.move(x_center + 200, y_center - 360)
 
         self.label.move(x_center - 70, y_center - 322)
-        self.label_3.move(x_center + 270, y_center + 70)
+        self.label_3.move(x_center + 270, y_center + 40)
         self.label_4.move(x_center - 350, y_center + 190)
 
         self.function.move(x_center - 30, y_center - 320)
