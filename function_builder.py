@@ -1,11 +1,10 @@
 import sys
 import sqlite3
 from random import choice
-
-from math import sin, cos, tan, log10, log2, pi, e, gamma, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh
+from math import sin, cos, tan, pi, e, gamma, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, log
 
 from PyQt6 import uic
-from PyQt6.QtCore import QPointF, Qt
+from PyQt6.QtCore import QPointF, Qt, QTimer
 from PyQt6.QtGui import QPainter, QColor, QPen, QPolygonF
 from PyQt6.QtWidgets import QApplication, QMainWindow, QColorDialog
 
@@ -49,6 +48,10 @@ class FunctionBuilder(QMainWindow):
 
         self.isdotted = True
         self.isaxis = True
+
+        self.resize_timer = QTimer(self)
+        self.resize_timer.setSingleShot(True)
+        self.resize_timer.timeout.connect(self.on_resize_finished)
 
         self.initUI()
 
@@ -241,63 +244,80 @@ class FunctionBuilder(QMainWindow):
         else:
             self.new_window_btn.setEnabled(True)
 
+        x_center = self.size().width() // 2 - 15
+        y_center = self.size().height() // 2 + 6
+
         qp.setPen(QPen(QColor('grey'), 1))
-        qp.drawPolygon(QPolygonF([QPointF(190, 170), QPointF(590, 170), QPointF(590, 570), QPointF(190, 570)]))
+        qp.drawPolygon(QPolygonF([QPointF(x_center - 200, y_center - 200),
+                                  QPointF(x_center + 200, y_center - 200),
+                                  QPointF(x_center + 200, y_center + 200),
+                                  QPointF(x_center - 200, y_center + 200)]))
+
+        qp.setPen(QPen(QColor('grey'), 3))
+        qp.drawPolygon(QPolygonF([QPointF(x_center - 392, y_center - 372),
+                                  QPointF(x_center - 392, y_center + 360),
+                                  QPointF(x_center + 422, y_center + 360),
+                                  QPointF(x_center + 422, y_center - 372)]))
 
         if self.isdotted:
             qp.setPen(self.dotted_pen)
             for i in range(1, 10):
-                qp.drawLine(QPointF(190 + i * 40, 170), QPointF(190 + i * 40, 570))
-                qp.drawLine(QPointF(190, 170 + i * 40), QPointF(590, 170 + 40 * i))
+                qp.drawLine(QPointF((x_center - 200) + i * 40, (y_center - 200)),
+                            QPointF((x_center - 200) + i * 40, (y_center + 200)))
+                qp.drawLine(QPointF((x_center - 200), (y_center - 200) + i * 40),
+                            QPointF((x_center + 200), (y_center - 200) + 40 * i))
 
         qp.setPen(self.axis_pen)
         if abs(self.center[1]) <= self.delta * 5:
-            qp.drawLine(QPointF(190, 370 - (-self.center[1] / self.delta * 40)),
-                        QPointF(590, 370 - (-self.center[1] / self.delta * 40)))
+            qp.drawLine(QPointF((x_center - 200), y_center - (-self.center[1] / self.delta * 40)),
+                        QPointF((x_center + 200), y_center - (-self.center[1] / self.delta * 40)))
         if abs(self.center[0]) <= self.delta * 5:
-            qp.drawLine(QPointF(390 + (-self.center[0] / self.delta * 40), 170),
-                        QPointF(390 + (-self.center[0] / self.delta * 40), 570))
+            qp.drawLine(QPointF(x_center + (-self.center[0] / self.delta * 40), (y_center - 200)),
+                        QPointF(x_center + (-self.center[0] / self.delta * 40), (y_center + 200)))
 
         for i in range(1, 10):
             if abs(self.center[1]) <= self.delta * 5:
-                qp.drawLine(QPointF(190 + i * 40, 365 - (-self.center[1] / self.delta * 40)),
-                            QPointF(190 + i * 40, 375 - (-self.center[1] / self.delta * 40)))
+                qp.drawLine(QPointF((x_center - 200) + i * 40, y_center - 5 - (-self.center[1] / self.delta * 40)),
+                            QPointF((x_center - 200) + i * 40, y_center + 5 - (-self.center[1] / self.delta * 40)))
                 qp.setPen(self.text_pen)
-                qp.drawText(QPointF(190 + i * 40 + 3, 375 + self.center[1] / self.delta * 40 + 10),
+                qp.drawText(QPointF((x_center - 200) + i * 40 + 3, y_center + 5 + self.center[1] / self.delta * 40 + 10),
                             str(round((i - 5 + self.center[0] / self.delta) * self.delta, 2)))
                 qp.setPen(self.axis_pen)
             if abs(self.center[0]) <= self.delta * 5:
-                qp.drawLine(QPointF(385 + (-self.center[0] / self.delta * 40), 570 - i * 40),
-                            QPointF(395 + (-self.center[0] / self.delta * 40), 570 - i * 40))
+                qp.drawLine(QPointF(x_center - 5 + (-self.center[0] / self.delta * 40), (y_center + 200) - i * 40),
+                            QPointF(x_center + 5 + (-self.center[0] / self.delta * 40), (y_center + 200) - i * 40))
                 if i - 5 + self.center[1] / self.delta != 0:
                     qp.setPen(self.text_pen)
-                    qp.drawText(QPointF(395 + (-self.center[0] / self.delta * 40), 582 - i * 40),
+                    qp.drawText(QPointF(x_center + 5 + (-self.center[0] / self.delta * 40),
+                                        (y_center + 200) + 12 - i * 40),
                                 str(round((i - 5 + self.center[1] / self.delta) * self.delta, 2)))
                     qp.setPen(self.axis_pen)
 
         if abs(self.center[0]) <= self.delta * 5:
-            qp.drawLine(QPointF(386 + (-self.center[0] / self.delta * 40), 176),
-                        QPointF(391 + (-self.center[0] / self.delta * 40), 171))
-            qp.drawLine(QPointF(395 + (-self.center[0] / self.delta * 40), 176),
-                        QPointF(390 + (-self.center[0] / self.delta * 40), 171))
+            qp.drawLine(QPointF(x_center - 4 + (-self.center[0] / self.delta * 40), (y_center - 200) + 6),
+                        QPointF(x_center + 1 + (-self.center[0] / self.delta * 40), (y_center - 200) + 1))
+            qp.drawLine(QPointF(x_center + 5 + (-self.center[0] / self.delta * 40), (y_center - 200) + 6),
+                        QPointF(x_center + (-self.center[0] / self.delta * 40), (y_center - 200) + 1))
             qp.setPen(self.text_pen)
-            qp.drawText(QPointF(400 + (-self.center[0] / self.delta * 40), 176), 'y')
+            qp.drawText(QPointF(x_center + 10 + (-self.center[0] / self.delta * 40), (y_center - 200) + 6), 'y')
             qp.setPen(self.axis_pen)
         if abs(self.center[1]) <= self.delta * 5:
-            qp.drawLine(QPointF(585, 366 - (-self.center[1] / self.delta * 40)),
-                        QPointF(590, 371 - (-self.center[1] / self.delta * 40)))
-            qp.drawLine(QPointF(585, 375 - (-self.center[1] / self.delta * 40)),
-                        QPointF(590, 370 - (-self.center[1] / self.delta * 40)))
+            qp.drawLine(QPointF((x_center + 200) - 5, y_center - 4 - (-self.center[1] / self.delta * 40)),
+                        QPointF((x_center + 200), y_center + 1 - (-self.center[1] / self.delta * 40)))
+            qp.drawLine(QPointF((x_center + 200) - 5, y_center + 5 - (-self.center[1] / self.delta * 40)),
+                        QPointF((x_center + 200), y_center - (-self.center[1] / self.delta * 40)))
             qp.setPen(self.text_pen)
-            qp.drawText(QPointF(580, 385 - (-self.center[1] / self.delta * 40)), 'x')
+            qp.drawText(QPointF((x_center + 200) - 10, y_center + 15 - (-self.center[1] / self.delta * 40)), 'x')
             qp.setPen(self.axis_pen)
 
         qp.setPen(self.text_pen)
         for i in range(1, 10):
             if abs(-self.center[1]) > self.delta * 5:
-                qp.drawText(QPointF(170 + i * 40, 570), str(round(self.center[0] + (i - 5) * self.delta, 2)))
+                qp.drawText(QPointF((x_center - 200) - 20 + i * 40, (y_center + 200)),
+                            str(round(self.center[0] + (i - 5) * self.delta, 2)))
             if abs(-self.center[0]) > self.delta * 5:
-                qp.drawText(QPointF(570, 567 - i * 40), str(round(self.center[1] + (i - 5) * self.delta, 2)))
+                qp.drawText(QPointF((x_center + 200) - 20, (y_center + 200) - 3 - i * 40),
+                            str(round(self.center[1] + (i - 5) * self.delta, 2)))
 
     def build(self, qp, do_build=True):
         self.build_base(qp)
@@ -306,62 +326,75 @@ class FunctionBuilder(QMainWindow):
             return None
         self.do_build = False
 
-        self.func_pen.setWidth(2)
+        x_center = self.size().width() // 2 - 15
+        y_center = self.size().height() // 2 + 6
+
+        if self.isaxis:
+            self.func_pen.setWidth(2)
+        else:
+            self.func_pen.setWidth(1)
         qp.setPen(self.func_pen)
         points = []
 
         if self.Fx.isChecked():
-            for i in range(190, 591):
+            for i in range((x_center - 200), (x_center + 200) + 1):
                 try:
-                    points.append(QPointF(i, -self.get_arg((i - 390) / 40 * self.delta + self.center[0]) *
-                                          40 / self.delta + 370 + self.center[1] * 40 / self.delta))
+                    points.append(QPointF(i, -self.get_arg((i - x_center) / 40 * self.delta + self.center[0]) *
+                                          40 / self.delta + y_center + self.center[1] * 40 / self.delta))
                 except Exception:
                     points.append(-1)
 
             for i in range(399):
                 if points[i] == -1 or points[i + 1] == -1:
                     continue
-                if 170 <= points[i].y() < 571 and 170 <= points[i + 1].y() < 571:
+                if ((y_center - 200) <= points[i].y() < (y_center + 200) + 1 and
+                        (y_center - 200) <= points[i + 1].y() < (y_center + 200) + 1):
                     qp.drawLine(points[i], points[i + 1])
-                elif 170 <= points[i].y() < 571 and points[i + 1].y() < 571:
-                    qp.drawLine(points[i], QPointF(i + 190, 170))
-                elif 170 <= points[i].y() < 571 and points[i + 1].y() >= 170:
-                    qp.drawLine(points[i], QPointF(i + 190, 570))
-                elif 170 <= points[i + 1].y() < 571 and points[i].y() < 571:
-                    qp.drawLine(QPointF(i + 1 + 190, 170), points[i + 1])
-                elif 170 <= points[i + 1].y() < 571 and points[i].y() >= 170:
-                    qp.drawLine(QPointF(i + 1 + 190, 570), points[i + 1])
+                elif ((y_center - 200) <= points[i].y() < (y_center + 200) + 1 and
+                      points[i + 1].y() < (y_center + 200) + 1):
+                    qp.drawLine(points[i], QPointF(i + (x_center - 200), (y_center - 200)))
+                elif (y_center - 200) <= points[i].y() < (y_center + 200) + 1 and points[i + 1].y() >= (y_center - 200):
+                    qp.drawLine(points[i], QPointF(i + (x_center - 200), (y_center + 200)))
+                elif ((y_center - 200) <= points[i + 1].y() < (y_center + 200) + 1 and
+                      points[i].y() < (y_center + 200) + 1):
+                    qp.drawLine(QPointF(i + 1 + (x_center - 200), (y_center - 200)), points[i + 1])
+                elif (y_center - 200) <= points[i + 1].y() < (y_center + 200) + 1 and points[i].y() >= (y_center - 200):
+                    qp.drawLine(QPointF(i + 1 + (x_center - 200), (y_center + 200)), points[i + 1])
 
         elif self.Fy.isChecked():
-            for i in range(170, 571):
-                i = 571 - i - 1 + 170
+            for i in range((y_center - 200), (y_center + 200) + 1):
+                i = (y_center + 200) - i + (y_center - 200)
                 try:
-                    points.append(QPointF(self.get_arg((i - 370) / 40 * self.delta + self.center[1]) *
-                                          40 / self.delta + 390 - self.center[0] * 40 / self.delta, 571 - i - 1 + 170))
+                    points.append(QPointF(self.get_arg((i - y_center) / 40 * self.delta + self.center[1]) *
+                                          40 / self.delta + x_center - self.center[0] * 40 / self.delta,
+                                          (y_center + 200) - i + (y_center - 200)))
                 except Exception:
                     points.append(-1)
 
             for i in range(399):
                 if points[i] == -1 or points[i + 1] == -1:
                     continue
-                if 190 <= points[i].x() < 591 and 190 <= points[i + 1].x() < 591:
+                if ((x_center - 200) <= points[i].x() < (x_center + 200) + 1 and
+                        (x_center - 200) <= points[i + 1].x() < (x_center + 200) + 1):
                     qp.drawLine(points[i], points[i + 1])
-                elif 190 <= points[i].x() < 591 and points[i + 1].x() < 591:
-                    qp.drawLine(points[i], QPointF(190, 170 + i))
-                elif 190 <= points[i].x() < 591 and points[i + 1].x() >= 190:
-                    qp.drawLine(points[i], QPointF(590, 170 + i))
-                elif 190 <= points[i + 1].x() < 591 and points[i].x() < 591:
-                    qp.drawLine(QPointF(190, 170 + i + 1), points[i + 1])
-                elif 190 <= points[i + 1].x() < 591 and points[i].x() >= 190:
-                    qp.drawLine(QPointF(590, 170 + i + 1), points[i + 1])
+                elif ((x_center - 200) <= points[i].x() < (x_center + 200) + 1 and
+                      points[i + 1].x() < (x_center + 200) + 1):
+                    qp.drawLine(points[i], QPointF((x_center - 200), (y_center - 200) + i))
+                elif (x_center - 200) <= points[i].x() < (x_center + 200) + 1 and points[i + 1].x() >= (x_center - 200):
+                    qp.drawLine(points[i], QPointF((x_center + 200), (y_center - 200) + i))
+                elif ((x_center - 200) <= points[i + 1].x() < (x_center + 200) + 1 and
+                      points[i].x() < (x_center + 200) + 1):
+                    qp.drawLine(QPointF((x_center - 200), (y_center - 200) + i + 1), points[i + 1])
+                elif (x_center - 200) <= points[i + 1].x() < (x_center + 200) + 1 and points[i].x() >= (x_center - 200):
+                    qp.drawLine(QPointF((x_center + 200), (y_center - 200) + i + 1), points[i + 1])
 
         else:
             self.func_pen.setWidth(3)
-            for x in range(190, 591, 2):
-                for y in range(170, 571, 2):
+            for x in range((x_center - 200), (x_center + 200) + 1, 2):
+                for y in range((y_center - 200), (y_center + 200) + 1, 2):
                     point = QPointF(x, y)
-                    if self.is_point_valid((x - 390) / 40 * self.delta + self.center[0],
-                                           (370 - y) / 40 * self.delta + self.center[1],
+                    if self.is_point_valid((x - x_center) / 40 * self.delta + self.center[0],
+                                           (y_center - y) / 40 * self.delta + self.center[1],
                                            radius=2):
                         points.append(point)
             qp.drawPoints(points)
@@ -369,7 +402,7 @@ class FunctionBuilder(QMainWindow):
     def change_argument(self):
         if self.Fxy.isChecked():
             arg = 'x'
-            arg2 = 'y'
+            arg2 = '0'
             self.function.setPlaceholderText(f"Введите f(x, y)...")
             self.label.setText(
                 f'<html><head/><body><p><span style=" font-size:12pt;">0 = </span></p></body></html>')
@@ -398,7 +431,9 @@ class FunctionBuilder(QMainWindow):
         for function in base_funcs:
             func_text = list(function.text())[1:]
             for i in range(len(func_text)):
-                if func_text[i] == arg2:
+                if self.Fxy.isChecked() and func_text[i] == 'y':
+                    func_text[i] = 'x'
+                elif func_text[i] == arg2:
                     func_text[i] = arg
             function.setText(arg2 + ''.join(func_text))
 
@@ -467,12 +502,10 @@ class FunctionBuilder(QMainWindow):
             self.axis_btn.setText('вернуть акцентирование')
             self.isaxis = False
             self.axis_pen.setWidth(1)
-            self.func_pen.setWidth(1)
         else:
             self.axis_btn.setText('убрать акцентирование')
             self.isaxis = True
             self.axis_pen.setWidth(3)
-            self.func_pen.setWidth(2)
         self.paint()
 
     def base_func(self):
@@ -498,6 +531,56 @@ class FunctionBuilder(QMainWindow):
         elif event.angleDelta().y() < 0 and self.verticalSlider.value() != 0:
             self.verticalSlider.setValue(self.verticalSlider.value() - 1)
         event.accept()
+    
+    def resizeEvent(self, event):
+        self.resize_timer.start(200)
+
+        x_center = self.size().width() // 2 - 15
+        y_center = self.size().height() // 2 + 6
+
+        self.Fx.move(x_center + 80, y_center - 360)
+        self.Fy.move(x_center + 140, y_center - 360)
+        self.Fxy.move(x_center + 200, y_center - 360)
+
+        self.label.move(x_center - 70, y_center - 322)
+        self.label_3.move(x_center + 270, y_center + 70)
+        self.label_4.move(x_center - 350, y_center + 190)
+
+        self.function.move(x_center - 30, y_center - 320)
+
+        self.build_btn.move(x_center + 240, y_center - 280)
+        self.new_window_btn.move(x_center + 250, y_center - 150)
+        self.instruction_btn.move(x_center - 320, y_center - 350)
+        self.open_bd_btn.move(x_center - 320, y_center - 280)
+
+        self.change_color_btn.move(x_center - 360, y_center + 220)
+        self.dotted_line_btn.move(x_center - 360, y_center + 250)
+        self.axis_btn.move(x_center - 360, y_center + 280)
+        self.return_to_zero_btn.move(x_center - 360, y_center + 310)
+
+        self.lineal_func_btn.move(x_center + 250, y_center + 70)
+        self.module_func_btn.move(x_center + 250, y_center + 100)
+        self.quadratic_func_btn.move(x_center + 250, y_center + 130)
+        self.radical_func_btn.move(x_center + 250, y_center + 160)
+        self.cube_func_btn.move(x_center + 250, y_center + 190)
+        self.hyperbolic_func_btn.move(x_center + 250, y_center + 220)
+        self.sinus_func_btn.move(x_center + 250, y_center + 250)
+        self.cosine_func_btn.move(x_center + 250, y_center + 280)
+        self.exponent_func_btn.move(x_center + 250, y_center + 310)
+
+        self.verticalSlider.move(x_center - 360, y_center - 210)
+
+        self.too_up.move(x_center - 14, y_center - 270)
+        self.up.move(x_center - 14, y_center - 230)
+        self.too_left.move(x_center - 270, y_center - 15)
+        self.left.move(x_center - 230, y_center - 15)
+        self.too_down.move(x_center - 14, y_center + 242)
+        self.down.move(x_center - 14, y_center + 210)
+        self.too_right.move(x_center + 240, y_center - 15)
+        self.right.move(x_center + 210, y_center - 15)
+
+    def on_resize_finished(self):
+        self.paint()
 
 
 if __name__ == '__main__':

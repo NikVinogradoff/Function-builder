@@ -1,4 +1,4 @@
-from math import sin, cos, tan, log10, log2, pi, e, gamma, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh
+from math import sin, cos, tan, pi, e, gamma, asin, acos, atan, sinh, cosh, tanh, asinh, acosh, atanh, log
 
 from PyQt6 import uic
 from PyQt6.QtCore import QPointF, Qt
@@ -165,123 +165,153 @@ class BuiltFunction(QWidget):
             return pre_int - delta
 
     def build_base(self, qp):
+        x_center = self.width() // 2 + 50
+        y_center = self.height() // 2 - 50
+
+        qp.setPen(QPen(QColor('grey'), 3))
+        qp.drawPolygon(QPolygonF([QPointF((x_center - 502), (y_center - 402)),
+                                  QPointF((x_center + 402), (y_center - 402)),
+                                  QPointF((x_center + 402), (y_center + 502)),
+                                  QPointF((x_center - 502), (y_center + 502))]))
+
         qp.setPen(QPen(QColor('grey'), 1))
-        qp.drawPolygon(QPolygonF([QPointF(200, 100), QPointF(800, 100), QPointF(800, 700), QPointF(200, 700)]))
+        qp.drawPolygon(QPolygonF([QPointF((x_center - 300), (y_center - 300)),
+                                  QPointF((x_center + 300), (y_center - 300)),
+                                  QPointF((x_center + 300), (y_center + 300)),
+                                  QPointF((x_center - 300), (y_center + 300))]))
 
         if self.border_radio.isChecked():
             if self.parent.isdotted:
                 qp.setPen(self.parent.dotted_pen)
                 for i in range(1, 10):
-                    qp.drawLine(QPointF(200 + i * 60, 100), QPointF(200 + i * 60, 700))
-                    qp.drawLine(QPointF(200, 100 + i * 60), QPointF(800, 100 + 60 * i))
+                    qp.drawLine(QPointF((x_center - 300) + i * 60, (y_center - 300)),
+                                QPointF((x_center - 300) + i * 60, (y_center + 300)))
+                    qp.drawLine(QPointF((x_center - 300), (y_center - 300) + i * 60),
+                                QPointF((x_center + 300), (y_center - 300) + 60 * i))
 
             qp.setPen(self.parent.axis_pen)
             if abs(self.center[1]) <= self.delta * 5:
-                qp.drawLine(QPointF(200, 400 - (-self.center[1] / self.delta * 60)),
-                            QPointF(800, 400 - (-self.center[1] / self.delta * 60)))
+                qp.drawLine(QPointF((x_center - 300), y_center - (-self.center[1] / self.delta * 60)),
+                            QPointF((x_center + 300), y_center - (-self.center[1] / self.delta * 60)))
             if abs(self.center[0]) <= self.delta * 5:
-                qp.drawLine(QPointF(500 + (-self.center[0] / self.delta * 60), 100),
-                            QPointF(500 + (-self.center[0] / self.delta * 60), 700))
+                qp.drawLine(QPointF(x_center + (-self.center[0] / self.delta * 60), (y_center - 300)),
+                            QPointF(x_center + (-self.center[0] / self.delta * 60), (y_center + 300)))
 
             for i in range(1, 10):
                 if abs(self.center[1]) <= self.delta * 5:
-                    qp.drawLine(QPointF(200 + i * 60, 395 - (-self.center[1] / self.delta * 60)),
-                                QPointF(200 + i * 60, 405 - (-self.center[1] / self.delta * 60)))
+                    qp.drawLine(QPointF((x_center - 300) + i * 60, y_center - 5 - (-self.center[1] / self.delta * 60)),
+                                QPointF((x_center - 300) + i * 60, y_center + 5 - (-self.center[1] / self.delta * 60)))
                     qp.setPen(self.parent.text_pen)
-                    qp.drawText(QPointF(200 + i * 60 + 3, 405 + self.center[1] / self.delta * 60 + 10),
+                    qp.drawText(QPointF((x_center - 300) + i * 60 + 3, y_center + 5 + self.center[1] / self.delta * 60 + 10),
                                 str(round((i - 5 + self.center[0] / self.delta) * self.delta, 2)))
                     qp.setPen(self.parent.axis_pen)
                 if abs(self.center[0]) <= self.delta * 5:
-                    qp.drawLine(QPointF(495 + (-self.center[0] / self.delta * 60), 700 - i * 60),
-                                QPointF(505 + (-self.center[0] / self.delta * 60), 700 - i * 60))
+                    qp.drawLine(QPointF(x_center - 5 + (-self.center[0] / self.delta * 60), (y_center + 300) - i * 60),
+                                QPointF(x_center + 5 + (-self.center[0] / self.delta * 60), (y_center + 300) - i * 60))
                     if i - 5 + self.center[1] / self.delta != 0:
                         qp.setPen(self.parent.text_pen)
-                        qp.drawText(QPointF(505 + (-self.center[0] / self.delta * 60), 692 - i * 60),
+                        qp.drawText(QPointF(x_center + 5 + (-self.center[0] / self.delta * 60),
+                                            (y_center + 300) - 8 - i * 60),
                                     str(round((i - 5 + self.center[1] / self.delta) * self.delta, 2)))
                         qp.setPen(self.parent.axis_pen)
 
             if abs(self.center[0]) <= self.delta * 5:
-                qp.drawLine(QPointF(496 + (-self.center[0] / self.delta * 60), 106),
-                            QPointF(501 + (-self.center[0] / self.delta * 60), 101))
-                qp.drawLine(QPointF(505 + (-self.center[0] / self.delta * 60), 106),
-                            QPointF(500 + (-self.center[0] / self.delta * 60), 101))
+                qp.drawLine(QPointF(x_center - 4 + (-self.center[0] / self.delta * 60), (y_center - 300) + 6),
+                            QPointF(x_center + 1 + (-self.center[0] / self.delta * 60), (y_center - 300) + 1))
+                qp.drawLine(QPointF(x_center + 5 + (-self.center[0] / self.delta * 60), (y_center - 300) + 6),
+                            QPointF(x_center + (-self.center[0] / self.delta * 60), (y_center - 300) + 1))
                 qp.setPen(self.parent.text_pen)
-                qp.drawText(QPointF(510 + (-self.center[0] / self.delta * 60), 106), 'y')
+                qp.drawText(QPointF(x_center + 10 + (-self.center[0] / self.delta * 60), (y_center - 300) + 6), 'y')
                 qp.setPen(self.parent.axis_pen)
             if abs(self.center[1]) <= self.delta * 5:
-                qp.drawLine(QPointF(795, 396 - (-self.center[1] / self.delta * 60)),
-                            QPointF(800, 401 - (-self.center[1] / self.delta * 60)))
-                qp.drawLine(QPointF(795, 405 - (-self.center[1] / self.delta * 60)),
-                            QPointF(800, 400 - (-self.center[1] / self.delta * 60)))
+                qp.drawLine(QPointF((x_center + 300) - 5, y_center - 4 - (-self.center[1] / self.delta * 60)),
+                            QPointF((x_center + 300), y_center + 1 - (-self.center[1] / self.delta * 60)))
+                qp.drawLine(QPointF((x_center + 300) - 5, y_center + 5 - (-self.center[1] / self.delta * 60)),
+                            QPointF((x_center + 300), y_center - (-self.center[1] / self.delta * 60)))
                 qp.setPen(self.parent.text_pen)
-                qp.drawText(QPointF(790, 415 - (-self.center[1] / self.delta * 60)), 'x')
+                qp.drawText(QPointF((x_center + 300) - 10, y_center + 15 - (-self.center[1] / self.delta * 60)), 'x')
                 qp.setPen(self.parent.axis_pen)
             qp.setPen(self.parent.text_pen)
 
             for i in range(1, 10):
                 if abs(-self.center[1]) > self.delta * 5:
-                    qp.drawText(QPointF(180 + i * 60, 700), str(round(self.center[0] + (i - 5) * self.delta, 2)))
+                    qp.drawText(QPointF((x_center - 300) - 20 + i * 60, (y_center + 300)),
+                                str(round(self.center[0] + (i - 5) * self.delta, 2)))
                 if abs(-self.center[0]) > self.delta * 5:
-                    qp.drawText(QPointF(780, 697 - i * 60), str(round(self.center[1] + (i - 5) * self.delta, 2)))
+                    qp.drawText(QPointF((x_center + 300) - 20, (y_center + 300) - 3 - i * 60),
+                                str(round(self.center[1] + (i - 5) * self.delta, 2)))
         else:
             if self.parent.isdotted:
                 qp.setPen(self.parent.dotted_pen)
                 for i in range(15):
-                    qp.drawLine(QPointF(220 + i * 40, 100), QPointF(220 + i * 40, 700))
-                    qp.drawLine(QPointF(200, 120 + i * 40), QPointF(800, 120 + 40 * i))
+                    qp.drawLine(QPointF((x_center - 300) + 20 + i * 40, (y_center - 300)),
+                                QPointF((x_center - 300) + 20 + i * 40, (y_center + 300)))
+                    qp.drawLine(QPointF((x_center - 300), (y_center - 300) + 20 + i * 40),
+                                QPointF((x_center + 300), (y_center - 300) + 20 + 40 * i))
 
             qp.setPen(self.parent.axis_pen)
             if abs(self.center[1]) <= self.delta * 7.5:
-                qp.drawLine(QPointF(200, 400 - (-self.center[1] / self.delta * 40)),
-                            QPointF(800, 400 - (-self.center[1] / self.delta * 40)))
+                qp.drawLine(QPointF((x_center - 300), y_center - (-self.center[1] / self.delta * 40)),
+                            QPointF((x_center + 300), y_center - (-self.center[1] / self.delta * 40)))
             if abs(self.center[0]) <= self.delta * 7.5:
-                qp.drawLine(QPointF(500 + (-self.center[0] / self.delta * 40), 100),
-                            QPointF(500 + (-self.center[0] / self.delta * 40), 700))
+                qp.drawLine(QPointF(x_center + (-self.center[0] / self.delta * 40), (y_center - 300)),
+                            QPointF(x_center + (-self.center[0] / self.delta * 40), (y_center + 300)))
 
             for i in range(15):
                 if abs(self.center[1]) <= self.delta * 7.5:
-                    qp.drawLine(QPointF(220 + i * 40, 395 - (-self.center[1] / self.delta * 40)),
-                                QPointF(220 + i * 40, 405 - (-self.center[1] / self.delta * 40)))
+                    qp.drawLine(QPointF((x_center - 300) + 20 + i * 40,
+                                        y_center - 5 - (-self.center[1] / self.delta * 40)),
+                                QPointF((x_center - 300) + 20 + i * 40,
+                                        y_center + 5 - (-self.center[1] / self.delta * 40)))
                     qp.setPen(self.parent.text_pen)
-                    qp.drawText(QPointF(200 + i * 40 + 3, 405 + self.center[1] / self.delta * 40 + 15),
+                    qp.drawText(QPointF((x_center - 300) + i * 40 + 3,
+                                        y_center + 5 + self.center[1] / self.delta * 40 + 15),
                                 str(round((i - 7 + self.center[0] / self.delta) * self.delta, 2)))
                     qp.setPen(self.parent.axis_pen)
                 if abs(self.center[0]) <= self.delta * 7.5:
-                    qp.drawLine(QPointF(495 + (-self.center[0] / self.delta * 40), 680 - i * 40),
-                                QPointF(505 + (-self.center[0] / self.delta * 40), 680 - i * 40))
+                    qp.drawLine(QPointF(x_center - 5 + (-self.center[0] / self.delta * 40),
+                                        (y_center + 300) - 20 - i * 40),
+                                QPointF(x_center + 5 + (-self.center[0] / self.delta * 40),
+                                        (y_center + 300) - 20 - i * 40))
                     if i - 7 + self.center[1] / self.delta != 0:
                         qp.setPen(self.parent.text_pen)
-                        qp.drawText(QPointF(510 + (-self.center[0] / self.delta * 40), 687 - i * 40),
+                        qp.drawText(QPointF(x_center + 10 + (-self.center[0] / self.delta * 40),
+                                            (y_center + 300) - 13 - i * 40),
                                     str(round((i - 7 + self.center[1] / self.delta) * self.delta, 2)))
                         qp.setPen(self.parent.axis_pen)
 
             if abs(self.center[0]) <= self.delta * 7.5:
-                qp.drawLine(QPointF(496 + (-self.center[0] / self.delta * 40), 106),
-                            QPointF(501 + (-self.center[0] / self.delta * 40), 101))
-                qp.drawLine(QPointF(505 + (-self.center[0] / self.delta * 40), 106),
-                            QPointF(500 + (-self.center[0] / self.delta * 40), 101))
+                qp.drawLine(QPointF(x_center - 4 + (-self.center[0] / self.delta * 40), (y_center - 300) + 6),
+                            QPointF(x_center + 1 + (-self.center[0] / self.delta * 40), (y_center - 300) + 1))
+                qp.drawLine(QPointF(x_center + 5 + (-self.center[0] / self.delta * 40), (y_center - 300) + 6),
+                            QPointF(x_center + (-self.center[0] / self.delta * 40), (y_center - 300) + 1))
                 qp.setPen(self.parent.text_pen)
-                qp.drawText(QPointF(510 + (-self.center[0] / self.delta * 40), 106), 'y')
+                qp.drawText(QPointF(x_center + 10 + (-self.center[0] / self.delta * 40), (y_center - 300) + 6), 'y')
                 qp.setPen(self.parent.axis_pen)
             if abs(self.center[1]) <= self.delta * 7.5:
-                qp.drawLine(QPointF(795, 396 - (-self.center[1] / self.delta * 40)),
-                            QPointF(800, 401 - (-self.center[1] / self.delta * 40)))
-                qp.drawLine(QPointF(795, 405 - (-self.center[1] / self.delta * 40)),
-                            QPointF(800, 400 - (-self.center[1] / self.delta * 40)))
+                qp.drawLine(QPointF((x_center + 300) - 5, y_center - 4 - (-self.center[1] / self.delta * 40)),
+                            QPointF((x_center + 300), y_center + 1 - (-self.center[1] / self.delta * 40)))
+                qp.drawLine(QPointF((x_center + 300) - 5, y_center + 1 - (-self.center[1] / self.delta * 40)),
+                            QPointF((x_center + 300), y_center - (-self.center[1] / self.delta * 40)))
                 qp.setPen(self.parent.text_pen)
-                qp.drawText(QPointF(790, 415 - (-self.center[1] / self.delta * 40)), 'x')
+                qp.drawText(QPointF((x_center + 300) - 10, y_center + 15 - (-self.center[1] / self.delta * 40)), 'x')
                 qp.setPen(self.parent.axis_pen)
 
             qp.setPen(self.parent.text_pen)
             for i in range(1, 16):
                 if abs(-self.center[1]) > self.delta * 7.5:
-                    qp.drawText(QPointF(160 + i * 40, 700), str(round(self.center[0] + (i - 8) * self.delta, 2)))
+                    qp.drawText(QPointF((x_center - 300) - 40 + i * 40, (y_center + 300)),
+                                str(round(self.center[0] + (i - 8) * self.delta, 2)))
                 if abs(-self.center[0]) > self.delta * 7.5:
-                    qp.drawText(QPointF(780, 714 - i * 40), str(round(self.center[1] + (i - 8) * self.delta, 2)))
+                    qp.drawText(QPointF((x_center + 300) - 20, (y_center + 300) + 14 - i * 40),
+                                str(round(self.center[1] + (i - 8) * self.delta, 2)))
 
     def build(self, qp):
         self.build_base(qp)
         points = []
+
+        x_center = self.width() // 2 + 50
+        y_center = self.height() // 2 - 50
 
         if self.border_radio.isChecked() and self.build_checkbox.isChecked():
             if self.do_x_line and self.x_line.text().strip() != '':
@@ -291,8 +321,8 @@ class BuiltFunction(QWidget):
                     pass
                 if self.center[0] - self.delta * 5 <= value <= self.center[0] + self.delta * 5:
                     qp.setPen(self.line_pen)
-                    qp.drawLine(QPointF((value - self.center[0]) / self.delta * 60 + 500, 100),
-                                QPointF((value - self.center[0]) / self.delta * 60 + 500, 700))
+                    qp.drawLine(QPointF((value - self.center[0]) / self.delta * 60 + x_center, (y_center - 300)),
+                                QPointF((value - self.center[0]) / self.delta * 60 + x_center, (y_center + 300)))
 
             if self.do_y_line and self.y_line.text().strip() != '':
                 try:
@@ -301,54 +331,65 @@ class BuiltFunction(QWidget):
                     pass
                 if self.center[1] - self.delta * 5 <= value <= self.center[1] + self.delta * 5:
                     qp.setPen(self.line_pen)
-                    qp.drawLine(QPointF(200, -(value - self.center[1]) / self.delta * 60 + 400),
-                                QPointF(800, -(value - self.center[1]) / self.delta * 60 + 400))
+                    qp.drawLine(QPointF((x_center - 300), -(value - self.center[1]) / self.delta * 60 + y_center),
+                                QPointF((x_center + 300), -(value - self.center[1]) / self.delta * 60 + y_center))
 
             qp.setPen(self.parent.func_pen)
             if self.parent.Fx.isChecked():
-                for i in range(200, 801):
+                for i in range((x_center - 300), (x_center + 300) + 1):
                     try:
-                        points.append(QPointF(i, -self.get_arg((i - 500) / 60 * self.delta + self.center[0]) *
-                                              60 / self.delta + 400 + self.center[1] * 60 / self.delta))
+                        points.append(QPointF(i, -self.get_arg((i - x_center) / 60 * self.delta + self.center[0]) *
+                                              60 / self.delta + y_center + self.center[1] * 60 / self.delta))
                     except Exception:
                         points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 100 <= points[i].y() < 701 and 100 <= points[i + 1].y() < 701:
+                    if ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                            (y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() < 701:
-                        qp.drawLine(points[i], QPointF(i + 200, 100))
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() >= 100:
-                        qp.drawLine(points[i], QPointF(i + 200, 700))
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() < 701:
-                        qp.drawLine(QPointF(i + 1 + 200, 100), points[i + 1])
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() >= 100:
-                        qp.drawLine(QPointF(i + 1 + 200, 700), points[i + 1])
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() < (y_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center - 300)))
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() >= (y_center - 300)):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center + 300)))
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() < (y_center + 300) + 1):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center - 300)), points[i + 1])
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() >= (y_center - 300)):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center + 300)), points[i + 1])
 
             elif self.parent.Fy.isChecked():
-                for i in range(100, 701):
-                    i = 701 - i - 1 + 100
+                for i in range((y_center - 300), (y_center + 300) + 1):
+                    i = (y_center + 300) - i + (y_center - 300)
                     try:
-                        points.append(QPointF(self.get_arg((i - 400) / 60 * self.delta + self.center[1]) * 60 /
-                                              self.delta + 500 - self.center[0] * 60 / self.delta, 701 - i - 1 + 100))
+                        points.append(QPointF(self.get_arg((i - y_center) / 60 * self.delta + self.center[1]) * 60 /
+                                              self.delta + x_center - self.center[0] * 60 / self.delta,
+                                              (y_center + 300) - i + (y_center - 300)))
                     except Exception:
                         points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 200 <= points[i].x() < 801 and 200 <= points[i + 1].x() < 801:
+                    if ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                            (x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() < 801:
-                        qp.drawLine(points[i], QPointF(200, 100 + i))
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() >= 200:
-                        qp.drawLine(points[i], QPointF(800, 100 + i))
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() < 801:
-                        qp.drawLine(QPointF(200, 100 + i + 1), points[i + 1])
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() >= 200:
-                        qp.drawLine(QPointF(800, 100 + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() < (x_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF((x_center - 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() >= (x_center - 300)):
+                        qp.drawLine(points[i], QPointF((x_center + 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() < (x_center + 300) + 1):
+                        qp.drawLine(QPointF((x_center - 300), (y_center - 300) + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() >= (x_center - 300)):
+                        qp.drawLine(QPointF((x_center + 300), (y_center - 300) + i + 1), points[i + 1])
 
         elif self.build_checkbox.isChecked():
             if self.do_x_line and self.x_line.text().strip() != '':
@@ -358,8 +399,8 @@ class BuiltFunction(QWidget):
                     pass
                 if self.center[0] - self.delta * 7.5 <= value <= self.center[0] + self.delta * 7.5:
                     qp.setPen(self.line_pen)
-                    qp.drawLine(QPointF((value - self.center[0]) / self.delta * 40 + 500, 100),
-                                QPointF((value - self.center[0]) / self.delta * 40 + 500, 700))
+                    qp.drawLine(QPointF((value - self.center[0]) / self.delta * 40 + x_center, (y_center - 300)),
+                                QPointF((value - self.center[0]) / self.delta * 40 + x_center, (y_center + 300)))
 
             if self.do_y_line and self.y_line.text().strip() != '':
                 try:
@@ -368,54 +409,65 @@ class BuiltFunction(QWidget):
                     pass
                 if self.center[1] - self.delta * 7.5 <= value <= self.center[1] + self.delta * 7.5:
                     qp.setPen(self.line_pen)
-                    qp.drawLine(QPointF(200, -(value - self.center[1]) / self.delta * 40 + 400),
-                                QPointF(800, -(value - self.center[1]) / self.delta * 40 + 400))
+                    qp.drawLine(QPointF((x_center - 300), -(value - self.center[1]) / self.delta * 40 + y_center),
+                                QPointF((x_center + 300), -(value - self.center[1]) / self.delta * 40 + y_center))
 
             qp.setPen(self.parent.func_pen)
             if self.parent.Fx.isChecked():
-                for i in range(200, 801):
+                for i in range((x_center - 300), (x_center + 300) + 1):
                     try:
-                        points.append(QPointF(i, -self.get_arg((i - 500) / 40 * self.delta + self.center[0]) *
-                                              40 / self.delta + 400 + self.center[1] * 40 / self.delta))
+                        points.append(QPointF(i, -self.get_arg((i - x_center) / 40 * self.delta + self.center[0]) *
+                                              40 / self.delta + y_center + self.center[1] * 40 / self.delta))
                     except Exception:
                         points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 100 <= points[i].y() < 701 and 100 <= points[i + 1].y() < 701:
+                    if ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                            (y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() < 701:
-                        qp.drawLine(points[i], QPointF(i + 200, 100))
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() >= 100:
-                        qp.drawLine(points[i], QPointF(i + 200, 700))
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() < 701:
-                        qp.drawLine(QPointF(i + 1 + 200, 100), points[i + 1])
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() >= 100:
-                        qp.drawLine(QPointF(i + 1 + 200, 700), points[i + 1])
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() < (y_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center - 300)))
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() >= (y_center - 300)):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center + 300)))
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() < (y_center + 300) + 1):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center - 300)), points[i + 1])
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() >= (y_center - 300)):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center + 300)), points[i + 1])
 
             elif self.parent.Fy.isChecked():
-                for i in range(100, 701):
-                    i = 701 - i - 1 + 100
+                for i in range((y_center - 300), (y_center + 300) + 1):
+                    i = (y_center + 300) - i + (y_center - 300)
                     try:
-                        points.append(QPointF(self.get_arg((i - 400) / 40 * self.delta + self.center[1]) * 40 /
-                                              self.delta + 500 - self.center[0] * 40 / self.delta, 701 - i - 1 + 100))
+                        points.append(QPointF(self.get_arg((i - y_center) / 40 * self.delta + self.center[1]) * 40 /
+                                              self.delta + x_center - self.center[0] * 40 / self.delta,
+                                              (y_center + 300) - i + (y_center - 300)))
                     except Exception:
                         points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 200 <= points[i].x() < 801 and 200 <= points[i + 1].x() < 801:
+                    if ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                            (x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() < 801:
-                        qp.drawLine(points[i], QPointF(200, 100 + i))
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() >= 200:
-                        qp.drawLine(points[i], QPointF(800, 100 + i))
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() < 801:
-                        qp.drawLine(QPointF(200, 100 + i + 1), points[i + 1])
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() >= 200:
-                        qp.drawLine(QPointF(800, 100 + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() < (x_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF((x_center - 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() >= (x_center - 300)):
+                        qp.drawLine(points[i], QPointF((x_center + 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() < (x_center + 300) + 1):
+                        qp.drawLine(QPointF((x_center - 300), (y_center - 300) + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() >= (x_center - 300)):
+                        qp.drawLine(QPointF((x_center + 300), (y_center - 300) + i + 1), points[i + 1])
 
         if self.build_derivative_checkbox.isChecked():
             self.build_derivative(qp)
@@ -430,195 +482,250 @@ class BuiltFunction(QWidget):
         qp.setPen(self.rev_pen)
         points = []
 
+        x_center = self.width() // 2 + 50
+        y_center = self.height() // 2 - 50
+
         if self.border_radio.isChecked():
             if self.parent.Fy.isChecked():
-                for i in range(200, 801):
+                for i in range((x_center - 300), (x_center + 300)  + 1):
                     try:
-                        points.append(QPointF(i, -self.get_arg((i - 500) / 60 * self.delta + self.center[0]) *
-                                              60 / self.delta + 400 + self.center[1] * 60 / self.delta))
+                        points.append(QPointF(i, -self.get_arg((i - x_center) / 60 * self.delta + self.center[0]) *
+                                              60 / self.delta + y_center + self.center[1] * 60 / self.delta))
                     except Exception:
                         points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 100 <= points[i].y() < 701 and 100 <= points[i + 1].y() < 701:
+                    if ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                            (y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() < 701:
-                        qp.drawLine(points[i], QPointF(i + 200, 100))
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() >= 100:
-                        qp.drawLine(points[i], QPointF(i + 200, 700))
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() < 701:
-                        qp.drawLine(QPointF(i + 1 + 200, 100), points[i + 1])
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() >= 100:
-                        qp.drawLine(QPointF(i + 1 + 200, 700), points[i + 1])
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() < (y_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center - 300)))
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() >= (y_center - 300)):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center + 300)))
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() < (y_center + 300) + 1):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center - 300)), points[i + 1])
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() >= (y_center - 300)):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center + 300)), points[i + 1])
 
             elif self.parent.Fx.isChecked():
-                for i in range(100, 701):
-                    i = 701 - i - 1 + 100
+                for i in range((y_center - 300), (y_center + 300) + 1):
+                    i = (y_center + 300) - i + (y_center - 300)
                     try:
-                        points.append(QPointF(self.get_arg((i - 400) / 60 * self.delta + self.center[1]) * 60 /
-                                              self.delta + 500 - self.center[0] * 60 / self.delta, 701 - i - 1 + 100))
+                        points.append(QPointF(self.get_arg((i - y_center) / 60 * self.delta + self.center[1]) * 60 /
+                                              self.delta + x_center - self.center[0] * 60 / self.delta,
+                                              (y_center + 300) - i + (y_center - 300)))
                     except Exception:
                         points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 200 <= points[i].x() < 801 and 200 <= points[i + 1].x() < 801:
+                    if ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                            (x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() < 801:
-                        qp.drawLine(points[i], QPointF(200, 100 + i))
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() >= 200:
-                        qp.drawLine(points[i], QPointF(800, 100 + i))
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() < 801:
-                        qp.drawLine(QPointF(200, 100 + i + 1), points[i + 1])
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() >= 200:
-                        qp.drawLine(QPointF(800, 100 + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() < (x_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF((x_center - 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() >= (x_center - 300)):
+                        qp.drawLine(points[i], QPointF((x_center + 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() < (x_center + 300) + 1):
+                        qp.drawLine(QPointF((x_center - 300), (y_center - 300) + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() >= (x_center - 300)):
+                        qp.drawLine(QPointF((x_center + 300), (y_center - 300) + i + 1), points[i + 1])
 
         else:
             if self.parent.Fy.isChecked():
-                for i in range(200, 801):
+                for i in range((x_center - 300), (x_center + 300) + 1):
                     try:
-                        points.append(QPointF(i, -self.get_arg((i - 500) / 40 * self.delta + self.center[0]) *
-                                              40 / self.delta + 400 + self.center[1] * 40 / self.delta))
+                        points.append(QPointF(i, -self.get_arg((i - x_center) / 40 * self.delta + self.center[0]) *
+                                              40 / self.delta + y_center + self.center[1] * 40 / self.delta))
                     except Exception:
                         points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 100 <= points[i].y() < 701 and 100 <= points[i + 1].y() < 701:
+                    if ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                            (y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() < 701:
-                        qp.drawLine(points[i], QPointF(i + 200, 100))
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() >= 100:
-                        qp.drawLine(points[i], QPointF(i + 200, 700))
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() < 701:
-                        qp.drawLine(QPointF(i + 1 + 200, 100), points[i + 1])
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() >= 100:
-                        qp.drawLine(QPointF(i + 1 + 200, 700), points[i + 1])
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() < (y_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center - 300)))
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() >= (y_center - 300)):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center + 300)))
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() < (y_center + 300) + 1):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center - 300)), points[i + 1])
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() >= (y_center - 300)):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center + 300)), points[i + 1])
 
             elif self.parent.Fx.isChecked():
-                for i in range(100, 701):
-                    i = 701 - i - 1 + 100
+                for i in range((y_center - 300), (y_center + 300) + 1):
+                    i = (y_center + 300) - i + (y_center - 300)
                     try:
-                        points.append(QPointF(self.get_arg((i - 400) / 40 * self.delta + self.center[1]) * 40 /
-                                              self.delta + 500 - self.center[0] * 40 / self.delta, 701 - i - 1 + 100))
+                        points.append(QPointF(self.get_arg((i - y_center) / 40 * self.delta + self.center[1]) * 40 /
+                                              self.delta + x_center - self.center[0] * 40 / self.delta,
+                                              (y_center + 300) - i + (y_center - 300)))
                     except Exception:
                         points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 200 <= points[i].x() < 801 and 200 <= points[i + 1].x() < 801:
+                    if ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                            (x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() < 801:
-                        qp.drawLine(points[i], QPointF(200, 100 + i))
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() >= 200:
-                        qp.drawLine(points[i], QPointF(800, 100 + i))
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() < 801:
-                        qp.drawLine(QPointF(200, 100 + i + 1), points[i + 1])
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() >= 200:
-                        qp.drawLine(QPointF(800, 100 + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() < (x_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF((x_center - 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() >= (x_center - 300)):
+                        qp.drawLine(points[i], QPointF((x_center + 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() < (x_center + 300) + 1):
+                        qp.drawLine(QPointF((x_center - 300), (y_center - 300) + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() >= (x_center - 300)):
+                        qp.drawLine(QPointF((x_center + 300), (y_center - 300) + i + 1), points[i + 1])
 
     def build_derivative(self, qp):
+        x_center = self.width() // 2 + 50
+        y_center = self.height() // 2 - 50
+
         qp.setPen(self.der_pen)
         points = []
 
         if self.border_radio.isChecked():
             if self.parent.Fx.isChecked():
-                for i in range(200, 801):
+                for i in range((x_center - 300), (x_center + 300) + 1):
                     try:
-                        points.append(QPointF(i, -self.get_derivative((i - 500) / 60 * self.delta + self.center[0]) *
-                                              60 / self.delta + 400 + self.center[1] * 60 / self.delta))
+                        points.append(QPointF(i,
+                                              -self.get_derivative((i - x_center) / 60 * self.delta + self.center[0]) *
+                                              60 / self.delta + y_center + self.center[1] * 60 / self.delta))
                     except Exception:
                         points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 100 <= points[i].y() < 701 and 100 <= points[i + 1].y() < 701:
+                    if ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                            (y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() < 701:
-                        qp.drawLine(points[i], QPointF(i + 200, 100))
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() >= 100:
-                        qp.drawLine(points[i], QPointF(i + 200, 700))
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() < 701:
-                        qp.drawLine(QPointF(i + 1 + 200, 100), points[i + 1])
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() >= 100:
-                        qp.drawLine(QPointF(i + 1 + 200, 700), points[i + 1])
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() < (y_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center - 300)))
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() >= (y_center - 300)):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center + 300) + 1))
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() < (y_center + 300) + 1):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center - 300)), points[i + 1])
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() >= (y_center - 300)):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center + 300)), points[i + 1])
 
             elif self.parent.Fy.isChecked():
-                for i in range(100, 701):
-                    i = 701 - i - 1 + 100
+                for i in range((y_center - 300), (y_center + 300) + 1):
+                    i = (y_center + 300) - i + (y_center - 300)
                     try:
-                        points.append(QPointF(self.get_derivative((i - 400) / 60 * self.delta + self.center[1]) * 60 /
-                                              self.delta + 500 - self.center[0] * 60 / self.delta, 701 - i - 1 + 100))
+                        points.append(QPointF(self.get_derivative((i - y_center) / 60 * self.delta + self.center[1]) *
+                                              60 / self.delta + x_center - self.center[0] * 60 / self.delta,
+                                              (y_center + 300) - i + (y_center - 300)))
                     except Exception:
                         points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 200 <= points[i].x() < 801 and 200 <= points[i + 1].x() < 801:
+                    if ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                            (x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() < 801:
-                        qp.drawLine(points[i], QPointF(200, 100 + i))
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() >= 200:
-                        qp.drawLine(points[i], QPointF(800, 100 + i))
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() < 801:
-                        qp.drawLine(QPointF(200, 100 + i + 1), points[i + 1])
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() >= 200:
-                        qp.drawLine(QPointF(800, 100 + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() < (x_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF((x_center - 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() >= (x_center - 300)):
+                        qp.drawLine(points[i], QPointF((x_center + 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() < (x_center + 300) + 1):
+                        qp.drawLine(QPointF((x_center - 300), (y_center - 300) + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() >= (x_center - 300)):
+                        qp.drawLine(QPointF((x_center + 300), (y_center - 300) + i + 1), points[i + 1])
 
         else:
             if self.parent.Fx.isChecked():
-                for i in range(200, 801):
+                for i in range((x_center - 300), (x_center + 300) + 1):
                     try:
-                        points.append(QPointF(i, -self.get_derivative((i - 500) / 40 * self.delta + self.center[0]) *
-                                              40 / self.delta + 400 + self.center[1] * 40 / self.delta))
+                        points.append(QPointF(i,
+                                              -self.get_derivative((i - x_center) / 40 * self.delta + self.center[0]) *
+                                              40 / self.delta + y_center + self.center[1] * 40 / self.delta))
                     except Exception:
                         points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 100 <= points[i].y() < 701 and 100 <= points[i + 1].y() < 701:
+                    if ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                            (y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() < 701:
-                        qp.drawLine(points[i], QPointF(i + 200, 100))
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() >= 100:
-                        qp.drawLine(points[i], QPointF(i + 200, 700))
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() < 701:
-                        qp.drawLine(QPointF(i + 1 + 200, 100), points[i + 1])
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() >= 100:
-                        qp.drawLine(QPointF(i + 1 + 200, 700), points[i + 1])
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() < (y_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center - 300)))
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() >= (y_center - 300)):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center + 300)))
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() < (y_center + 300) + 1):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center - 300)), points[i + 1])
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() >= (y_center - 300)):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center + 300)), points[i + 1])
 
             elif self.parent.Fy.isChecked():
-                for i in range(100, 701):
-                    i = 701 - i - 1 + 100
+                for i in range((y_center - 300), (y_center + 300) + 1):
+                    i = (y_center + 300) - i + (y_center - 300)
                     try:
-                        points.append(QPointF(self.get_derivative((i - 400) / 40 * self.delta + self.center[1]) * 40 /
-                                              self.delta + 500 - self.center[0] * 40 / self.delta, 701 - i - 1 + 100))
+                        points.append(QPointF(self.get_derivative((i - y_center) / 40 * self.delta + self.center[1]) *
+                                              40 / self.delta + x_center - self.center[0] * 40 / self.delta,
+                                              (y_center + 300) - i + (y_center - 300)))
                     except Exception:
                         points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 200 <= points[i].x() < 801 and 200 <= points[i + 1].x() < 801:
+                    if ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                            (x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() < 801:
-                        qp.drawLine(points[i], QPointF(200, 100 + i))
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() >= 200:
-                        qp.drawLine(points[i], QPointF(800, 100 + i))
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() < 801:
-                        qp.drawLine(QPointF(200, 100 + i + 1), points[i + 1])
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() >= 200:
-                        qp.drawLine(QPointF(800, 100 + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() < (x_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF((x_center - 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() >= (x_center - 300)):
+                        qp.drawLine(points[i], QPointF((x_center + 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() < (x_center + 300) + 1):
+                        qp.drawLine(QPointF((x_center - 300), (y_center - 300) + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() >= (x_center - 300)):
+                        qp.drawLine(QPointF((x_center + 300), (y_center - 300) + i + 1), points[i + 1])
 
     def build_integral(self, qp):
+        x_center = self.width() // 2 + 50
+        y_center = self.height() // 2 - 50
+
         qp.setPen(self.int_pen)
         points = []
 
@@ -626,25 +733,25 @@ class BuiltFunction(QWidget):
             if self.parent.Fx.isChecked():
                 if -5 * self.delta <= self.center[0] <= 5 * self.delta:
                     pre_int = 0
-                    for i in range(200, int(500 - self.center[0] / self.delta * 60)):
-                        i = 200 + int(500 - self.center[0] / self.delta * 60) - i - 1
+                    for i in range((x_center - 300), int(x_center - self.center[0] / self.delta * 60)):
+                        i = (x_center - 300) + int(x_center - self.center[0] / self.delta * 60) - i - 1
                         try:
-                            points.append(QPointF(i, -self.get_integral((i - 500) / 60 * self.delta + self.center[0],
+                            points.append(QPointF(i, -self.get_integral((i - x_center) / 60 * self.delta + self.center[0],
                                                                         pre_int)
-                                                  * 60 / self.delta + 400 + self.center[1] * 60 / self.delta))
-                            pre_int = self.get_integral((i - 500) / 60 * self.delta + self.center[0], pre_int)
+                                                  * 60 / self.delta + y_center + self.center[1] * 60 / self.delta))
+                            pre_int = self.get_integral((i - x_center) / 60 * self.delta + self.center[0], pre_int)
                         except Exception:
                             points.append(-1)
                     points.reverse()
-                    points.append(QPointF(500 - self.center[0] * 60 / self.delta,
-                                          400 + self.center[1] * 60 / self.delta))
+                    points.append(QPointF(x_center - self.center[0] * 60 / self.delta,
+                                          y_center + self.center[1] * 60 / self.delta))
                     pre_int = 0
-                    for i in range(int(501 - self.center[0] / self.delta * 60), 801):
+                    for i in range(int(x_center + 1 - self.center[0] / self.delta * 60), (x_center + 300) + 1):
                         try:
-                            points.append(QPointF(i, -self.get_integral((i - 500) / 60 * self.delta + self.center[0],
+                            points.append(QPointF(i, -self.get_integral((i - x_center) / 60 * self.delta + self.center[0],
                                                                         pre_int)
-                                                  * 60 / self.delta + 400 + self.center[1] * 60 / self.delta))
-                            pre_int = self.get_integral((i - 500) / 60 * self.delta + self.center[0], pre_int)
+                                                  * 60 / self.delta + y_center + self.center[1] * 60 / self.delta))
+                            pre_int = self.get_integral((i - x_center) / 60 * self.delta + self.center[0], pre_int)
                         except Exception:
                             points.append(-1)
 
@@ -653,12 +760,12 @@ class BuiltFunction(QWidget):
                     for i in range(1, int(-(-self.center[0] + 5 * self.delta) * 60 // self.delta)):
                         pre_int = self.get_integral(i / 60 * self.delta, pre_int)
 
-                    for i in range(200, 801):
+                    for i in range((x_center - 300), (x_center + 300) + 1):
                         try:
-                            points.append(QPointF(i, -self.get_integral((i - 500) / 60 * self.delta + self.center[0],
+                            points.append(QPointF(i, -self.get_integral((i - x_center) / 60 * self.delta + self.center[0],
                                                                         pre_int)
-                                                  * 60 / self.delta + 400 + self.center[1] * 60 / self.delta))
-                            pre_int = self.get_integral((i - 500) / 60 * self.delta + self.center[0], pre_int)
+                                                  * 60 / self.delta + y_center + self.center[1] * 60 / self.delta))
+                            pre_int = self.get_integral((i - x_center) / 60 * self.delta + self.center[0], pre_int)
                         except Exception:
                             points.append(-1)
 
@@ -667,52 +774,57 @@ class BuiltFunction(QWidget):
                     for i in range(-1, int((-self.center[0] - 5 * self.delta) * 60 // self.delta)):
                         pre_int = self.get_integral(i / 60 * self.delta, pre_int)
 
-                    for i in range(200, 801):
-                        i = 1000 - i
+                    for i in range((x_center - 300), (x_center + 300) + 1):
+                        i = 2 * x_center - i
                         try:
-                            points.append(QPointF(i, -self.get_integral((i - 500) / 60 * self.delta + self.center[0],
+                            points.append(QPointF(i, -self.get_integral((i - x_center) / 60 * self.delta + self.center[0],
                                                                         pre_int)
-                                                  * 60 / self.delta + 400 + self.center[1] * 60 / self.delta))
-                            pre_int = self.get_integral((i - 500) / 60 * self.delta + self.center[0], pre_int)
+                                                  * 60 / self.delta + y_center + self.center[1] * 60 / self.delta))
+                            pre_int = self.get_integral((i - x_center) / 60 * self.delta + self.center[0], pre_int)
                         except Exception:
                             points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 100 <= points[i].y() < 701 and 100 <= points[i + 1].y() < 701:
+                    if ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                            (y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() < 701:
-                        qp.drawLine(points[i], QPointF(i + 200, 100))
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() >= 100:
-                        qp.drawLine(points[i], QPointF(i + 200, 700))
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() < 701:
-                        qp.drawLine(QPointF(i + 1 + 200, 100), points[i + 1])
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() >= 100:
-                        qp.drawLine(QPointF(i + 1 + 200, 700), points[i + 1])
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() < (y_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center - 300)))
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() >= (y_center - 300)):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center + 300)))
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() < (y_center + 300) + 1):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center - 300)), points[i + 1])
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() >= (y_center - 300)):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center + 300)), points[i + 1])
 
             elif self.parent.Fy.isChecked():
                 if -5 * self.delta <= self.center[1] <= 5 * self.delta:
                     pre_int = 0
-                    for i in range(100, int(400 + self.center[1] / self.delta * 60)):
-                        i = int(400 + self.center[1] / self.delta * 60) - i - 1 + 100
+                    for i in range((y_center - 300), int(y_center + self.center[1] / self.delta * 60)):
+                        i = int(y_center + self.center[1] / self.delta * 60) - i - 1 + (y_center - 300)
                         try:
-                            points.append(QPointF(self.get_integral((400 - i) / 60 * self.delta + self.center[1],
+                            points.append(QPointF(self.get_integral((y_center - i) / 60 * self.delta + self.center[1],
                                                                     pre_int) * 60 /
-                                                  self.delta + 500 - self.center[0] * 60 / self.delta, i))
-                            pre_int = self.get_integral((400 - i) / 60 * self.delta + self.center[1], pre_int)
+                                                  self.delta + x_center - self.center[0] * 60 / self.delta, i))
+                            pre_int = self.get_integral((y_center - i) / 60 * self.delta + self.center[1], pre_int)
                         except Exception:
                             points.append(-1)
                     points.reverse()
-                    points.append(QPointF(500 - self.center[0] * 60 / self.delta,
-                                          400 + self.center[1] * 60 / self.delta))
+                    points.append(QPointF(x_center - self.center[0] * 60 / self.delta,
+                                          y_center + self.center[1] * 60 / self.delta))
                     pre_int = 0
-                    for i in range(int(401 + self.center[1] / self.delta * 60), 701):
+                    for i in range(int(y_center + 1 + self.center[1] / self.delta * 60), (y_center + 300) + 1):
                         try:
-                            points.append(QPointF(self.get_integral((400 - i) / 60 * self.delta + self.center[1],
+                            points.append(QPointF(self.get_integral((y_center - i) / 60 * self.delta + self.center[1],
                                                                     pre_int) * 60 /
-                                                  self.delta + 500 - self.center[0] * 60 / self.delta, i))
-                            pre_int = self.get_integral((400 - i) / 60 * self.delta + self.center[1], pre_int)
+                                                  self.delta + x_center - self.center[0] * 60 / self.delta, i))
+                            pre_int = self.get_integral((y_center - i) / 60 * self.delta + self.center[1], pre_int)
                         except Exception:
                             points.append(-1)
 
@@ -721,13 +833,13 @@ class BuiltFunction(QWidget):
                     for i in range(1, int(-(-self.center[1] + 5 * self.delta) * 60 // self.delta)):
                         pre_int = self.get_integral(i / 60 * self.delta, pre_int)
 
-                    for i in range(100, 701):
-                        i = 800 - i
+                    for i in range((y_center - 300), (y_center + 300) + 1):
+                        i = 2 * y_center - i
                         try:
-                            points.append(QPointF(self.get_integral((400 - i) / 60 * self.delta + self.center[1],
+                            points.append(QPointF(self.get_integral((y_center - i) / 60 * self.delta + self.center[1],
                                                                     pre_int)
-                                                  * 60 / self.delta + 500 - self.center[0] * 60 / self.delta, i))
-                            pre_int = self.get_integral((400 - i) / 60 * self.delta + self.center[1], pre_int)
+                                                  * 60 / self.delta + x_center - self.center[0] * 60 / self.delta, i))
+                            pre_int = self.get_integral((y_center - i) / 60 * self.delta + self.center[1], pre_int)
                         except Exception:
                             points.append(-1)
 
@@ -736,52 +848,57 @@ class BuiltFunction(QWidget):
                     for i in range(-1, int((-self.center[1] - 5 * self.delta) * 60 // self.delta)):
                         pre_int = self.get_integral(i / 60 * self.delta, pre_int)
 
-                    for i in range(100, 701):
+                    for i in range((y_center - 300), (y_center + 300) + 1):
                         try:
-                            points.append(QPointF(self.get_integral((400 - i) / 60 * self.delta + self.center[1],
+                            points.append(QPointF(self.get_integral((y_center - i) / 60 * self.delta + self.center[1],
                                                                     pre_int)
-                                                  * 60 / self.delta + 500 - self.center[0] * 60 / self.delta, i))
-                            pre_int = self.get_integral((400 - i) / 60 * self.delta + self.center[1], pre_int)
+                                                  * 60 / self.delta + x_center - self.center[0] * 60 / self.delta, i))
+                            pre_int = self.get_integral((y_center - i) / 60 * self.delta + self.center[1], pre_int)
                         except Exception:
                             points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 200 <= points[i].x() < 801 and 200 <= points[i + 1].x() < 801:
+                    if ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                            (x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() < 801:
-                        qp.drawLine(points[i], QPointF(200, 100 + i))
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() >= 200:
-                        qp.drawLine(points[i], QPointF(800, 100 + i))
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() < 801:
-                        qp.drawLine(QPointF(200, 100 + i + 1), points[i + 1])
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() >= 200:
-                        qp.drawLine(QPointF(800, 100 + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() < (x_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF((x_center - 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() >= (x_center - 300)):
+                        qp.drawLine(points[i], QPointF((x_center + 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() < (x_center + 300) + 1):
+                        qp.drawLine(QPointF((x_center - 300), (y_center - 300) + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() >= (x_center - 300)):
+                        qp.drawLine(QPointF((x_center + 300), (y_center - 300) + i + 1), points[i + 1])
 
         else:
             if self.parent.Fx.isChecked():
                 if -7.5 * self.delta <= self.center[0] <= 7.5 * self.delta:
                     pre_int = 0
-                    for i in range(200, int(500 - self.center[0] / self.delta * 40)):
-                        i = 200 + int(500 - self.center[0] / self.delta * 40) - i - 1
+                    for i in range((x_center - 300), int(x_center - self.center[0] / self.delta * 40)):
+                        i = (x_center - 300) + int(x_center - self.center[0] / self.delta * 40) - i - 1
                         try:
-                            points.append(QPointF(i, -self.get_integral((i - 500) / 40 * self.delta + self.center[0],
+                            points.append(QPointF(i, -self.get_integral((i - x_center) / 40 * self.delta + self.center[0],
                                                                         pre_int)
-                                                  * 40 / self.delta + 400 + self.center[1] * 40 / self.delta))
-                            pre_int = self.get_integral((i - 500) / 40 * self.delta + self.center[0], pre_int)
+                                                  * 40 / self.delta + y_center + self.center[1] * 40 / self.delta))
+                            pre_int = self.get_integral((i - x_center) / 40 * self.delta + self.center[0], pre_int)
                         except Exception:
                             points.append(-1)
                     points.reverse()
-                    points.append(QPointF(500 - self.center[0] * 40 / self.delta,
-                                          400 + self.center[1] * 40 / self.delta))
+                    points.append(QPointF(x_center - self.center[0] * 40 / self.delta,
+                                          y_center + self.center[1] * 40 / self.delta))
                     pre_int = 0
-                    for i in range(int(501 - self.center[0] / self.delta * 40), 801):
+                    for i in range(int(x_center + 1 - self.center[0] / self.delta * 40), (x_center + 300) + 1):
                         try:
-                            points.append(QPointF(i, -self.get_integral((i - 500) / 40 * self.delta + self.center[0],
+                            points.append(QPointF(i, -self.get_integral((i - x_center) / 40 * self.delta + self.center[0],
                                                                         pre_int)
-                                                  * 40 / self.delta + 400 + self.center[1] * 40 / self.delta))
-                            pre_int = self.get_integral((i - 500) / 40 * self.delta + self.center[0], pre_int)
+                                                  * 40 / self.delta + y_center + self.center[1] * 40 / self.delta))
+                            pre_int = self.get_integral((i - x_center) / 40 * self.delta + self.center[0], pre_int)
                         except Exception:
                             points.append(-1)
 
@@ -790,12 +907,12 @@ class BuiltFunction(QWidget):
                     for i in range(1, int(-(-self.center[0] + 7.5 * self.delta) * 40 // self.delta)):
                         pre_int = self.get_integral(i / 40 * self.delta, pre_int)
 
-                    for i in range(200, 801):
+                    for i in range((x_center - 300), (x_center + 300) + 1):
                         try:
-                            points.append(QPointF(i, -self.get_integral((i - 500) / 40 * self.delta + self.center[0],
+                            points.append(QPointF(i, -self.get_integral((i - x_center) / 40 * self.delta + self.center[0],
                                                                         pre_int)
-                                                  * 40 / self.delta + 400 + self.center[1] * 40 / self.delta))
-                            pre_int = self.get_integral((i - 500) / 40 * self.delta + self.center[0], pre_int)
+                                                  * 40 / self.delta + y_center + self.center[1] * 40 / self.delta))
+                            pre_int = self.get_integral((i - x_center) / 40 * self.delta + self.center[0], pre_int)
                         except Exception:
                             points.append(-1)
 
@@ -804,52 +921,57 @@ class BuiltFunction(QWidget):
                     for i in range(-1, int((-self.center[0] - 7.5 * self.delta) * 40 // self.delta)):
                         pre_int = self.get_integral(i / 40 * self.delta, pre_int)
 
-                    for i in range(200, 801):
-                        i = 1000 - i
+                    for i in range((x_center - 300), (x_center + 300) + 1):
+                        i = 2 * x_center - i
                         try:
-                            points.append(QPointF(i, -self.get_integral((i - 500) / 40 * self.delta + self.center[0],
+                            points.append(QPointF(i, -self.get_integral((i - x_center) / 40 * self.delta + self.center[0],
                                                                         pre_int)
-                                                  * 40 / self.delta + 400 + self.center[1] * 40 / self.delta))
-                            pre_int = self.get_integral((i - 500) / 40 * self.delta + self.center[0], pre_int)
+                                                  * 40 / self.delta + y_center + self.center[1] * 40 / self.delta))
+                            pre_int = self.get_integral((i - x_center) / 40 * self.delta + self.center[0], pre_int)
                         except Exception:
                             points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 100 <= points[i].y() < 701 and 100 <= points[i + 1].y() < 701:
+                    if ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                            (y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() < 701:
-                        qp.drawLine(points[i], QPointF(i + 200, 100))
-                    elif 100 <= points[i].y() < 701 and points[i + 1].y() >= 100:
-                        qp.drawLine(points[i], QPointF(i + 200, 700))
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() < 701:
-                        qp.drawLine(QPointF(i + 1 + 200, 100), points[i + 1])
-                    elif 100 <= points[i + 1].y() < 701 and points[i].y() >= 100:
-                        qp.drawLine(QPointF(i + 1 + 200, 700), points[i + 1])
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() < (y_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center - 300)))
+                    elif ((y_center - 300) <= points[i].y() < (y_center + 300) + 1 and
+                          points[i + 1].y() >= (y_center - 300)):
+                        qp.drawLine(points[i], QPointF(i + (x_center - 300), (y_center + 300)))
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() < (y_center + 300) + 1):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center - 300)), points[i + 1])
+                    elif ((y_center - 300) <= points[i + 1].y() < (y_center + 300) + 1 and
+                          points[i].y() >= (y_center - 300)):
+                        qp.drawLine(QPointF(i + 1 + (x_center - 300), (y_center + 300)), points[i + 1])
 
             elif self.parent.Fy.isChecked():
                 if -7.5 * self.delta <= self.center[1] <= 7.5 * self.delta:
                     pre_int = 0
-                    for i in range(100, int(400 + self.center[1] / self.delta * 40)):
-                        i = int(400 + self.center[1] / self.delta * 40) - i - 1 + 100
+                    for i in range((y_center - 300), int(y_center + self.center[1] / self.delta * 40)):
+                        i = int(y_center + self.center[1] / self.delta * 40) - i - 1 + (y_center - 300)
                         try:
-                            points.append(QPointF(self.get_integral((400 - i) / 40 * self.delta + self.center[1],
+                            points.append(QPointF(self.get_integral((y_center - i) / 40 * self.delta + self.center[1],
                                                                     pre_int) * 40 /
-                                                  self.delta + 500 - self.center[0] * 40 / self.delta, i))
-                            pre_int = self.get_integral((400 - i) / 40 * self.delta + self.center[1], pre_int)
+                                                  self.delta + x_center - self.center[0] * 40 / self.delta, i))
+                            pre_int = self.get_integral((y_center - i) / 40 * self.delta + self.center[1], pre_int)
                         except Exception:
                             points.append(-1)
                     points.reverse()
-                    points.append(QPointF(500 - self.center[0] * 40 / self.delta,
-                                          400 + self.center[1] * 40 / self.delta))
+                    points.append(QPointF(x_center - self.center[0] * 40 / self.delta,
+                                          y_center + self.center[1] * 40 / self.delta))
                     pre_int = 0
-                    for i in range(int(401 + self.center[1] / self.delta * 40), 701):
+                    for i in range(int(y_center + 1 + self.center[1] / self.delta * 40), (y_center + 300) + 1):
                         try:
-                            points.append(QPointF(self.get_integral((400 - i) / 40 * self.delta + self.center[1],
+                            points.append(QPointF(self.get_integral((y_center - i) / 40 * self.delta + self.center[1],
                                                                     pre_int) * 40 /
-                                                  self.delta + 500 - self.center[0] * 40 / self.delta, i))
-                            pre_int = self.get_integral((400 - i) / 40 * self.delta + self.center[1], pre_int)
+                                                  self.delta + x_center - self.center[0] * 40 / self.delta, i))
+                            pre_int = self.get_integral((y_center - i) / 40 * self.delta + self.center[1], pre_int)
                         except Exception:
                             points.append(-1)
 
@@ -858,13 +980,13 @@ class BuiltFunction(QWidget):
                     for i in range(1, int(-(-self.center[1] + 7.5 * self.delta) * 40 // self.delta)):
                         pre_int = self.get_integral(i / 40 * self.delta, pre_int)
 
-                    for i in range(100, 701):
-                        i = 800 - i
+                    for i in range((y_center - 300), (y_center + 300) + 1):
+                        i = 2 * y_center - i
                         try:
-                            points.append(QPointF(self.get_integral((400 - i) / 40 * self.delta + self.center[1],
+                            points.append(QPointF(self.get_integral((y_center - i) / 40 * self.delta + self.center[1],
                                                                     pre_int)
-                                                  * 40 / self.delta + 500 - self.center[0] * 40 / self.delta, i))
-                            pre_int = self.get_integral((400 - i) / 40 * self.delta + self.center[1], pre_int)
+                                                  * 40 / self.delta + x_center - self.center[0] * 40 / self.delta, i))
+                            pre_int = self.get_integral((y_center - i) / 40 * self.delta + self.center[1], pre_int)
                         except Exception:
                             points.append(-1)
 
@@ -873,28 +995,33 @@ class BuiltFunction(QWidget):
                     for i in range(-1, int((-self.center[1] - 7.5 * self.delta) * 40 // self.delta)):
                         pre_int = self.get_integral(i / 40 * self.delta, pre_int)
 
-                    for i in range(100, 701):
+                    for i in range((y_center - 300), (y_center + 300) + 1):
                         try:
-                            points.append(QPointF(self.get_integral((400 - i) / 40 * self.delta + self.center[1],
+                            points.append(QPointF(self.get_integral((y_center - i) / 40 * self.delta + self.center[1],
                                                                     pre_int)
-                                                  * 40 / self.delta + 500 - self.center[0] * 40 / self.delta, i))
-                            pre_int = self.get_integral((400 - i) / 40 * self.delta + self.center[1], pre_int)
+                                                  * 40 / self.delta + x_center - self.center[0] * 40 / self.delta, i))
+                            pre_int = self.get_integral((y_center - i) / 40 * self.delta + self.center[1], pre_int)
                         except Exception:
                             points.append(-1)
 
                 for i in range(599):
                     if points[i] == -1 or points[i + 1] == -1:
                         continue
-                    if 200 <= points[i].x() < 801 and 200 <= points[i + 1].x() < 801:
+                    if ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                            (x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1):
                         qp.drawLine(points[i], points[i + 1])
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() < 801:
-                        qp.drawLine(points[i], QPointF(200, 100 + i))
-                    elif 200 <= points[i].x() < 801 and points[i + 1].x() >= 200:
-                        qp.drawLine(points[i], QPointF(800, 100 + i))
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() < 801:
-                        qp.drawLine(QPointF(200, 100 + i + 1), points[i + 1])
-                    elif 200 <= points[i + 1].x() < 801 and points[i].x() >= 200:
-                        qp.drawLine(QPointF(800, 100 + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() < (x_center + 300) + 1):
+                        qp.drawLine(points[i], QPointF((x_center - 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i].x() < (x_center + 300) + 1 and
+                          points[i + 1].x() >= (x_center - 300)):
+                        qp.drawLine(points[i], QPointF((x_center + 300), (y_center - 300) + i))
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() < (x_center + 300) + 1):
+                        qp.drawLine(QPointF((x_center - 300), (y_center - 300) + i + 1), points[i + 1])
+                    elif ((x_center - 300) <= points[i + 1].x() < (x_center + 300) + 1 and
+                          points[i].x() >= (x_center - 300)):
+                        qp.drawLine(QPointF((x_center + 300), (y_center - 300) + i + 1), points[i + 1])
 
     def move_up(self):
         self.center[1] += self.delta
@@ -1021,3 +1148,55 @@ class BuiltFunction(QWidget):
         elif event.angleDelta().y() < 0 and self.verticalSlider.value() != 0:
             self.verticalSlider.setValue(self.verticalSlider.value() - 1)
         event.accept()
+
+    def resizeEvent(self, event):
+        x_center = self.size().width() // 2
+        y_center = self.size().height() // 2
+
+        self.left.move(x_center - 290, y_center - 65)
+        self.too_left.move(x_center - 330, y_center - 65)
+        self.up.move(x_center + 36, y_center - 390)
+        self.too_up.move(x_center + 36, y_center - 430)
+        self.right.move(x_center + 368, y_center - 65)
+        self.too_right.move(x_center + 398, y_center - 65)
+        self.down.move(x_center + 36, y_center + 268)
+        self.too_down.move(x_center + 36, y_center + 298)
+
+        self.verticalSlider.move(x_center - 430, y_center - 290)
+
+        self.build_reversed_checkbox.move(x_center - 420, y_center + 260)
+        self.change_revcolor_btn.move(x_center - 210, y_center + 260)
+
+        self.x_line.move(x_center - 350, y_center + 380)
+        self.label.move(x_center - 390, y_center + 380)
+        self.build_x_btn.move(x_center - 250, y_center + 380)
+
+        self.y_line.move(x_center - 350, y_center + 410)
+        self.label_2.move(x_center - 390, y_center + 410)
+        self.build_y_btn.move(x_center - 250, y_center + 410)
+
+        self.label_3.move(x_center - 440, y_center + 350)
+        self.label_4.move(x_center - 420, y_center - 420)
+        self.label_5.move(x_center - 150, y_center + 420)
+
+        self.change_linecolor_btn.move(x_center - 300, y_center + 350)
+
+        self.label_6.move(x_center + 180, y_center + 300)
+        self.argument.move(x_center + 250, y_center + 340)
+        self.arg_label.move(x_center + 190, y_center + 340)
+        self.value_label.move(x_center + 210, y_center + 380)
+        self.find_btn.move(x_center + 350, y_center + 340)
+
+        self.border_radio.move(x_center - 420, y_center - 380)
+        self.size_radio.move(x_center - 420, y_center - 350)
+
+        self.return_to_zero_btn.move(x_center + 240, y_center - 400)
+        self.moving_btn.move(x_center + 240, y_center - 438)
+
+        self.change_dercolor_btn.move(x_center - 210, y_center + 290)
+        self.build_derivative_checkbox.move(x_center - 420, y_center + 290)
+
+        self.build_integral_checkbox.move(x_center - 420, y_center + 320)
+        self.change_intcolor_btn.move(x_center - 190, y_center + 320)
+
+        self.build_checkbox.move(x_center - 420, y_center + 230)

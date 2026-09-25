@@ -200,3 +200,11 @@ class FunctionBase(QWidget):
             self.sort_type = self.sender().text()
         self.table.setRowCount(0)
         self.load()
+
+    def resizeEvent(self, event):
+        x_center = self.size().width() // 2
+        y_center = self.size().height() // 2
+
+        self.scroll_area.move(x_center - 275, y_center - 300)
+
+        self.mode.move(x_center - 325, y_center - 340)

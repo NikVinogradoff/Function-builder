@@ -1,4 +1,5 @@
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtCore import QPointF
+from PyQt6.QtGui import QPixmap, QPainter, QPen, QColor, QPolygonF
 from PyQt6.QtWidgets import QWidget, QLabel, QRadioButton
 
 
@@ -16,11 +17,11 @@ class Instruction(QWidget):
         self.instr.setText('В поле ввода использовать только\nвыбранные переменные.\n'
                            'Разрешено использование символов\n"+"  "-"  "*"  "/"  "**"  "(...)",\nфункций '
                            'из библиотеки math\nиз списка в виде: "function(...)"\nи функции abs() в виде: "abs(...)".'
-                           '\nИсключения: "pi", "e".')
+                           '\nИсключения: "pi", "e", "log(a, x)".')
         self.instr.move(30, 10)
         self.instr.resize(270, 160)
 
-        self.yes = '"(a)sin(h)", "(a)cos(h)",\n"(a)tan(h)", "pi", "e",\n"log10", "log2",\n"gamma".'
+        self.yes = '"(a)sin(h)", "(a)cos(h)",\n"(a)tan(h)", "pi", "e",\n"log", "gamma".'
         self.funcs = QLabel(f'Список разрешённых\nфункций из math:\n{self.yes}', self)
         self.funcs.move(270, 12)
         self.funcs.resize(120, 150)
@@ -82,3 +83,38 @@ class Instruction(QWidget):
             self.example1.setText('0 = x ** 2 + 1    - можно')
             self.example2.setText('0 = y ** 2 + 1    - можно')
             self.example3.setText('0 = x ** 2 + y    - можно')
+
+    def resizeEvent(self, event):
+        x_center = self.size().width() // 2
+        y_center = self.size().height() // 2
+
+        self.instr.move(x_center - 170, y_center - 165)
+        self.funcs.move(x_center + 70, y_center - 163)
+
+        self.instr2.move(x_center - 150, y_center + 10)
+
+        self.fx.move(x_center - 170, y_center + 45)
+        self.fy.move(x_center - 110, y_center + 45)
+        self.fxy.move(x_center - 50, y_center + 45)
+
+        self.example1.move(x_center - 160, y_center + 75)
+        self.example2.move(x_center - 160, y_center + 95)
+        self.example3.move(x_center - 160, y_center + 115)
+
+        self.please.move(x_center + 20, y_center - 25)
+        self.pict.move(x_center + 25, y_center)
+
+    def paintEvent(self, event):
+        x_center = self.size().width() // 2
+        y_center = self.size().height() // 2
+
+        qp = QPainter()
+        qp.begin(self)
+
+        qp.setPen(QPen(QColor('grey'), 3))
+        qp.drawPolygon(QPolygonF([QPointF((x_center - 202), (y_center - 177)),
+                                  QPointF((x_center + 202), (y_center - 177)),
+                                  QPointF((x_center + 202), (y_center + 177)),
+                                  QPointF((x_center - 202), (y_center + 177))]))
+
+        qp.end()
