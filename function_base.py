@@ -1,7 +1,9 @@
+import shutil
 import sqlite3
 
-from PyQt6.QtWidgets import QWidget, QLabel, QTableWidget, QScrollArea, QMenuBar, QTableWidgetItem, QSizePolicy
-
+from PyQt6.QtGui import QIcon
+from PyQt6.QtWidgets import QWidget, QLabel, QTableWidget, QScrollArea, QMenuBar, QTableWidgetItem, QSizePolicy, \
+    QFileDialog, QMessageBox
 
 with open('style.css', 'r') as css:
     style = css.read()
@@ -54,16 +56,28 @@ class FunctionBase(QWidget):
 
         self.menu = QMenuBar(self)
 
+        self.file_menu = self.menu.addMenu('Файл')
+        self.save = self.file_menu.addAction('Сохранить')
+        self.save.setIcon(QIcon('iqons/save.png'))
+        self.save.triggered.connect(self.saving)
+        self.open = self.file_menu.addAction('Открыть')
+        self.open.setIcon(QIcon('iqons/open.png'))
+        self.open.triggered.connect(self.opening)
+
         self.mode_menu = self.menu.addMenu('Режим')
-        self.choose_mode = self.mode_menu.addAction('Выбор  👈')
+        self.choose_mode = self.mode_menu.addAction('Выбор')
+        self.choose_mode.setIcon(QIcon('iqons/choose.png'))
         self.choose_mode.triggered.connect(self.change_mode)
-        self.remove_mode = self.mode_menu.addAction('Удаление  🗑️')
+        self.remove_mode = self.mode_menu.addAction('Удаление ️')
+        self.remove_mode.setIcon(QIcon('iqons/remove.png'))
         self.remove_mode.triggered.connect(self.change_mode)
 
         self.actions_menu = self.menu.addMenu('Инструменты')
-        self.clear_funcs = self.actions_menu.addAction('Очистить  🆑')
+        self.clear_funcs = self.actions_menu.addAction('Очистить')
+        self.clear_funcs.setIcon(QIcon('iqons/clear.png'))
         self.clear_funcs.triggered.connect(self.clearing)
-        self.back = self.actions_menu.addAction('Вернуть последнее действие  🔙')
+        self.back = self.actions_menu.addAction('Вернуть последнее действие')
+        self.back.setIcon(QIcon('iqons/back.png'))
         self.back.triggered.connect(self.backing)
 
         self.sort_menu = self.menu.addMenu('Сортировка')
@@ -86,11 +100,64 @@ class FunctionBase(QWidget):
             from functions
             where type = ?
             """, (self.sort_type, )).fetchall()
+        self.table.setRowCount(0)
         for i, row in enumerate(res):
             self.table.setRowCount(
                 self.table.rowCount() + 1)
             for j, elem in enumerate(row):
                 self.table.setItem(i, j, QTableWidgetItem(str(elem)))
+
+    def saving(self):
+        current_db_path = "function_db.sqlite"
+
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Сохранить базу данных как",
+            "function_database.sqlite",
+            "SQLite Files (*.sqlite *.db);;All Files (*)"
+        )
+
+        if file_path:
+            try:
+                shutil.copy(current_db_path, file_path)
+                QMessageBox.information(self, "Успех", "Файл успешно сохранен!")
+            except Exception as e:
+                QMessageBox.critical(self, "Ошибка", f"Не удалось сохранить файл: {e}")
+
+    def opening(self):
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Выберите файл SQLite",
+            "",
+            "SQLite Databases (*.sqlite *.db);;All Files (*)"
+        )
+
+        if file_path:
+            try:
+                conn = sqlite3.Connection(file_path)
+                cursor = conn.cursor()
+                data = cursor.execute("""select function, type from functions""").fetchall()
+                for func, type in data:
+                    if str(type).strip() == 'f(x)':
+                        if not str(func).strip().startswith('y = ') or str(func).count('y') > 1:
+                            raise ValueError('f(x)')
+                    elif str(type).strip() == 'f(y)':
+                        if not str(func).strip().startswith('x = ') or str(func).count('x') > 1:
+                            raise ValueError('f(y)')
+                    elif str(type).strip() == 'f(x, y)':
+                        if not str(func).strip().startswith('0 = '):
+                            raise ValueError('f(x ,y)')
+                    else:
+                        raise TypeError(str(type))
+
+                cursor.execute("""delete from last""")
+                conn.commit()
+
+                self.sort_type = '*'
+                shutil.copy2(file_path, 'function_db.sqlite')
+                self.load()
+            except Exception as e:
+                QMessageBox.critical(self, "Ошибка", f"Не удалось открыть файл: {e}")
 
     def change_mode(self):
         if self.sender() is self.choose_mode:
