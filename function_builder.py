@@ -78,17 +78,17 @@ class FunctionBuilder(QMainWindow):
         self.verticalSlider.setValue(3)
         self.verticalSlider.valueChanged.connect(self.change_size)
 
-        self.up.clicked.connect(self.move_up)
-        self.too_up.clicked.connect(self.move_too_up)
+        self.up.clicked.connect(self.moving)
+        self.too_up.clicked.connect(self.moving)
 
-        self.down.clicked.connect(self.move_down)
-        self.too_down.clicked.connect(self.move_too_down)
+        self.down.clicked.connect(self.moving)
+        self.too_down.clicked.connect(self.moving)
 
-        self.left.clicked.connect(self.move_left)
-        self.too_left.clicked.connect(self.move_too_left)
+        self.left.clicked.connect(self.moving)
+        self.too_left.clicked.connect(self.moving)
 
-        self.right.clicked.connect(self.move_right)
-        self.too_right.clicked.connect(self.move_too_right)
+        self.right.clicked.connect(self.moving)
+        self.too_right.clicked.connect(self.moving)
 
         self.change_color_btn.clicked.connect(self.change_color)
         self.dotted_line_btn.clicked.connect(self.dotted_line)
@@ -439,36 +439,19 @@ class FunctionBuilder(QMainWindow):
 
         self.paint()
 
-    def move_up(self):
-        self.center[1] += self.delta
-        self.paint()
+    def moving(self):
+        direction = self.sender().objectName()
+        d = self.delta
+        dx = True
+        if 'down' in direction or 'left' in direction:
+            d *= -1
+        if 'too' in direction:
+            d *= 5
+        if 'up' in direction or 'down' in direction:
+            dx = False
+        self.center[0] += d * dx
+        self.center[1] += d * (not dx)
 
-    def move_too_up(self):
-        self.center[1] += 5 * self.delta
-        self.paint()
-
-    def move_down(self):
-        self.center[1] -= self.delta
-        self.paint()
-
-    def move_too_down(self):
-        self.center[1] -= 5 * self.delta
-        self.paint()
-
-    def move_left(self):
-        self.center[0] -= self.delta
-        self.paint()
-
-    def move_too_left(self):
-        self.center[0] -= 5 * self.delta
-        self.paint()
-
-    def move_right(self):
-        self.center[0] += self.delta
-        self.paint()
-
-    def move_too_right(self):
-        self.center[0] += 5 * self.delta
         self.paint()
 
     def change_size(self):

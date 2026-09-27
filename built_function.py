@@ -62,17 +62,17 @@ class BuiltFunction(QWidget):
         self.size_radio.clicked.connect(self.paint)
         self.border_radio.clicked.connect(self.paint)
 
-        self.up.clicked.connect(self.move_up)
-        self.too_up.clicked.connect(self.move_too_up)
+        self.up.clicked.connect(self.moving)
+        self.too_up.clicked.connect(self.moving)
 
-        self.down.clicked.connect(self.move_down)
-        self.too_down.clicked.connect(self.move_too_down)
+        self.down.clicked.connect(self.moving)
+        self.too_down.clicked.connect(self.moving)
 
-        self.left.clicked.connect(self.move_left)
-        self.too_left.clicked.connect(self.move_too_left)
+        self.left.clicked.connect(self.moving)
+        self.too_left.clicked.connect(self.moving)
 
-        self.right.clicked.connect(self.move_right)
-        self.too_right.clicked.connect(self.move_too_right)
+        self.right.clicked.connect(self.moving)
+        self.too_right.clicked.connect(self.moving)
 
         self.value_label.hide()
 
@@ -105,7 +105,7 @@ class BuiltFunction(QWidget):
         self.y_line.setClearButtonEnabled(True)
         self.argument.setClearButtonEnabled(True)
 
-        self.moving_btn.clicked.connect(self.moving)
+        self.moving_btn.clicked.connect(self.go)
 
     def paintEvent(self, event):
         if self.argument.text().strip() != '':
@@ -1023,48 +1023,19 @@ class BuiltFunction(QWidget):
                           points[i].x() >= (x_center - 300)):
                         qp.drawLine(QPointF((x_center + 300), (y_center - 300) + i + 1), points[i + 1])
 
-    def move_up(self):
-        self.center[1] += self.delta
-        self.paint()
+    def moving(self):
+        direction = self.sender().objectName()
+        d = self.delta
+        dx = True
+        if 'down' in direction or 'left' in direction:
+            d *= -1
+        if 'too' in direction:
+            d *= 5
+        if 'up' in direction or 'down' in direction:
+            dx = False
+        self.center[0] += d * dx
+        self.center[1] += d * (not dx)
 
-    def move_too_up(self):
-        if self.border_radio.isChecked():
-            self.center[1] += 5 * self.delta
-        else:
-            self.center[1] += 7.5 * self.delta
-        self.paint()
-
-    def move_down(self):
-        self.center[1] -= self.delta
-        self.paint()
-
-    def move_too_down(self):
-        if self.border_radio.isChecked():
-            self.center[1] -= 5 * self.delta
-        else:
-            self.center[1] -= 7.5 * self.delta
-        self.paint()
-
-    def move_left(self):
-        self.center[0] -= self.delta
-        self.paint()
-
-    def move_too_left(self):
-        if self.border_radio.isChecked():
-            self.center[0] -= 5 * self.delta
-        else:
-            self.center[0] -= 7.5 * self.delta
-        self.paint()
-
-    def move_right(self):
-        self.center[0] += self.delta
-        self.paint()
-
-    def move_too_right(self):
-        if self.border_radio.isChecked():
-            self.center[0] += 5 * self.delta
-        else:
-            self.center[0] += 7.5 * self.delta
         self.paint()
 
     def change_size(self):
@@ -1124,7 +1095,7 @@ class BuiltFunction(QWidget):
             self.value_label.setText(f'{self.value_begin}{str(round(self.get_arg(eval(self.argument.text())), 4))}')
             self.value_label.show()
 
-    def moving(self):
+    def go(self):
         num_x, ok1 = QInputDialog.getDouble(self, "Перемещение по x", "Введите абсциссу точки перемещения:", 0)
         if ok1:
             num_y, ok2 = QInputDialog.getDouble(self, "Перемещение по y", "Введите ординату точки перемещения:", 0)
