@@ -1,6 +1,7 @@
 import shutil
 import sqlite3
 
+from PyQt6.QtCore import Qt
 from PyQt6.QtGui import QIcon
 from PyQt6.QtWidgets import QWidget, QLabel, QTableWidget, QScrollArea, QMenuBar, QTableWidgetItem, QSizePolicy, \
     QFileDialog, QMessageBox
@@ -44,6 +45,8 @@ class FunctionBase(QWidget):
         self.table.setHorizontalHeaderLabels(('Функция', 'Тип'))
         self.table.setColumnWidth(0, 407)
         self.table.setColumnWidth(1, 100)
+        self.table.verticalHeader().setMinimumWidth(39)
+        self.table.verticalHeader().setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
 
         self.table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
         self.scroll_area.setWidget(self.table)
@@ -105,7 +108,10 @@ class FunctionBase(QWidget):
             self.table.setRowCount(
                 self.table.rowCount() + 1)
             for j, elem in enumerate(row):
-                self.table.setItem(i, j, QTableWidgetItem(str(elem)))
+                item = QTableWidgetItem(str(elem))
+                if j == 1:
+                    item.setTextAlignment(Qt.AlignmentFlag.AlignCenter)
+                self.table.setItem(i, j, item)
 
     def saving(self):
         current_db_path = "function_db.sqlite"
